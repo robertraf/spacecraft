@@ -78,6 +78,7 @@ export const ITEMS = {
   'scanner': { name: 'Escáner', emoji: '📡', type: 'tool', rarity: 'uncommon', effect: 'Revela items raros' },
   'jetpack': { name: 'Jetpack', emoji: '🚀', type: 'equipment', rarity: 'rare', effect: 'Viaja más rápido entre planetas' },
   'shield-gen': { name: 'Generador de Escudo', emoji: '🛡️', type: 'equipment', rarity: 'rare', effect: 'Protege en planetas peligrosos' },
+  'electric-pickaxe': { name: 'Pico Eléctrico', emoji: '⚡', type: 'tool', rarity: 'rare', effect: 'Mina rápido con efecto de taladro eléctrico' },
   'quantum-drill': { name: 'Taladro Cuántico', emoji: '🌀', type: 'tool', rarity: 'legendary', effect: 'Triplica recursos y encuentra items secretos' },
   'warp-drive': { name: 'Motor Warp', emoji: '✨', type: 'equipment', rarity: 'legendary', effect: 'Viaje instantáneo entre planetas' },
 };
@@ -100,6 +101,9 @@ export const RECIPES = [
   // Advanced equipment
   { id: 'jetpack', inputs: { 'steel-plate': 2, 'energy-cell': 2, 'frozen-gas': 3 }, output: 'jetpack', amount: 1 },
   { id: 'shield', inputs: { 'titanium-bar': 3, 'energy-cell': 1, 'diamond': 1 }, output: 'shield-gen', amount: 1 },
+
+  // Advanced tools
+  { id: 'electric-pickaxe', inputs: { 'steel-plate': 2, 'copper-wire': 3, 'energy-cell': 1 }, output: 'electric-pickaxe', amount: 1 },
 
   // Legendary
   { id: 'drill', inputs: { 'titanium-bar': 5, 'diamond': 3, 'nano-tube': 2, 'energy-cell': 2 }, output: 'quantum-drill', amount: 1 },
