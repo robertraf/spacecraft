@@ -175,6 +175,125 @@
   animation: pulse 0.8s ease-in-out infinite;
 }
 
+/* ===== PICKAXE STRIKE ANIMATION ===== */
+@keyframes pickaxeStrike {
+  0% { transform: rotate(0deg) translateY(0); }
+  30% { transform: rotate(-25deg) translateY(-4px); }
+  50% { transform: rotate(15deg) translateY(2px); }
+  70% { transform: rotate(-10deg) translateY(-2px); }
+  100% { transform: rotate(0deg) translateY(0); }
+}
+
+@keyframes electricSpark {
+  0%, 100% { opacity: 0; text-shadow: none; }
+  10% { opacity: 1; text-shadow: 0 0 8px #fbbf24, 0 0 16px #f59e0b; }
+  20% { opacity: 0.3; }
+  30% { opacity: 1; text-shadow: 0 0 12px #fbbf24, 0 0 24px #f59e0b; }
+  40% { opacity: 0.5; }
+  50% { opacity: 1; text-shadow: 0 0 8px #60a5fa, 0 0 20px #3b82f6; }
+  60% { opacity: 0.4; }
+  70% { opacity: 1; text-shadow: 0 0 12px #fbbf24, 0 0 24px #f59e0b; }
+  90% { opacity: 0.8; text-shadow: 0 0 6px #fbbf24; }
+}
+
+@keyframes shakeButton {
+  0%, 100% { transform: translateX(0); }
+  10% { transform: translateX(-2px); }
+  20% { transform: translateX(2px); }
+  30% { transform: translateX(-3px); }
+  40% { transform: translateX(3px); }
+  50% { transform: translateX(-2px); }
+  60% { transform: translateX(2px); }
+  70% { transform: translateX(-1px); }
+  80% { transform: translateX(1px); }
+}
+
+@keyframes rockCrumble {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx, 10px), var(--dy, -20px)) scale(0.3); }
+}
+
+@keyframes mineFlash {
+  0% { box-shadow: 0 0 0 rgba(99,102,241,0); }
+  50% { box-shadow: 0 0 30px rgba(99,102,241,0.4), 0 0 60px rgba(99,102,241,0.2); }
+  100% { box-shadow: 0 0 0 rgba(99,102,241,0); }
+}
+
+.mine-button.strike-anim {
+  animation: shakeButton 0.3s ease-out;
+}
+
+.mine-button.mining.electric-mining {
+  background: linear-gradient(135deg, #92400e, #78350f);
+  animation: shakeButton 0.15s ease-out infinite;
+}
+
+.planet-sphere.mine-strike {
+  animation: mineFlash 0.4s ease-out;
+}
+
+.planet-sphere.electric-strike {
+  animation: mineFlash 0.15s ease-out infinite alternate;
+}
+
+/* Rock particle effects */
+.mine-particles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+}
+
+.mine-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--planet-color, #aab8c2);
+  animation: rockCrumble 0.5s ease-out forwards;
+}
+
+/* Electric sparks overlay */
+.electric-sparks {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  animation: electricSpark 0.3s linear infinite;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* Mining result popup */
+@keyframes resultPopup {
+  0% { opacity: 0; transform: translateY(0) scale(0.5); }
+  30% { opacity: 1; transform: translateY(-10px) scale(1.1); }
+  60% { transform: translateY(-20px) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.8); }
+}
+
+.mine-result-popup {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  font-weight: 700;
+  pointer-events: none;
+  animation: resultPopup 1s ease-out forwards;
+  z-index: 10;
+  white-space: nowrap;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.mine-result-popup.success { color: var(--success); }
+.mine-result-popup.fail { color: var(--error); }
+
 /* ===== RESOURCES ===== */
 .planet-resources {
   width: 100%;

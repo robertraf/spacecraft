@@ -158,8 +158,11 @@ export function GameProvider({ children }) {
 
     const planet = state.currentPlanet;
     const hasPickaxe = state.equipment.includes('space-pickaxe');
+    const hasElectricPickaxe = state.equipment.includes('electric-pickaxe');
     const hasDrill = state.equipment.includes('quantum-drill');
     const hasScanner = state.equipment.includes('scanner');
+
+    const cooldown = hasElectricPickaxe ? 800 : MINE_COOLDOWN_MS;
 
     setTimeout(() => {
       const roll = Math.random();
@@ -185,10 +188,11 @@ export function GameProvider({ children }) {
 
       let amount = 1;
       if (hasDrill) amount = Math.random() < 0.5 ? 3 : 2;
+      else if (hasElectricPickaxe) amount = Math.random() < 0.5 ? 3 : 2;
       else if (hasPickaxe) amount = Math.random() < 0.5 ? 2 : 1;
 
       dispatch({ type: 'MINE_COMPLETE', payload: { itemId: chosen, amount } });
-    }, MINE_COOLDOWN_MS);
+    }, cooldown);
   }, [state.isMining, state.isTraveling, state.currentPlanet, state.equipment]);
 
   const travel = useCallback((planetId) => {
