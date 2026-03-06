@@ -1,0 +1,602 @@
+/* ===== GAME CONTAINER ===== */
+.game-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+  padding-bottom: var(--nav-height);
+  position: relative;
+}
+
+/* ===== HEADER ===== */
+.game-header {
+  text-align: center;
+  padding: 16px 16px 8px;
+  background: linear-gradient(180deg, rgba(99,102,241,0.15) 0%, transparent 100%);
+}
+
+.game-header h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #818cf8, #6366f1, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ===== MAIN CONTENT ===== */
+.game-main {
+  flex: 1;
+  padding: 8px 16px;
+  overflow-y: auto;
+}
+
+/* ===== NAVIGATION ===== */
+.game-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  height: var(--nav-height);
+  display: flex;
+  background: var(--bg-secondary);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+}
+
+.nav-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  padding: 8px 4px;
+}
+
+.nav-tab.active {
+  color: var(--accent);
+  background: rgba(99,102,241,0.1);
+}
+
+/* ===== PLANET VIEW ===== */
+.planet-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.planet-display {
+  text-align: center;
+  width: 100%;
+  padding: 24px 16px;
+  background: radial-gradient(ellipse at center, var(--planet-color, #4a90d9)10, transparent 70%);
+  border-radius: 16px;
+}
+
+.planet-sphere {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.2), transparent 60%),
+              radial-gradient(circle, var(--planet-color, #4a90d9), rgba(0,0,0,0.5));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 40px var(--planet-color, #4a90d9)44,
+              inset 0 -5px 15px rgba(0,0,0,0.3);
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.planet-emoji {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.planet-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.planet-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.danger-level {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: var(--warning);
+}
+
+/* ===== MINE BUTTON ===== */
+.mine-button {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), #4f46e5);
+  color: white;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.mine-button:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+.mine-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.mine-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.mine-button.mining {
+  background: linear-gradient(135deg, #374151, #1f2937);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.mining-anim {
+  animation: pulse 0.8s ease-in-out infinite;
+}
+
+/* ===== RESOURCES ===== */
+.planet-resources {
+  width: 100%;
+}
+
+.planet-resources h4 {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.resource-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.resource-tag {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ===== STAR MAP ===== */
+.star-map h3 {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+}
+
+.planets-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.planet-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 10px;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--text-primary);
+  transition: all 0.2s;
+  position: relative;
+}
+
+.planet-card:hover:not(:disabled) {
+  background: var(--bg-card-hover);
+  border-color: var(--planet-color);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--planet-color) 30%, transparent);
+}
+
+.planet-card.current {
+  border-color: var(--accent);
+  background: rgba(99,102,241,0.1);
+}
+
+.planet-card.undiscovered {
+  opacity: 0.5;
+}
+
+.planet-card:disabled {
+  cursor: default;
+}
+
+.planet-card-emoji {
+  font-size: 2rem;
+}
+
+.planet-card-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.here-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--accent);
+  color: white;
+  font-size: 0.55rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.traveling-badge {
+  font-size: 0.7rem;
+  color: var(--warning);
+  animation: pulse 1s infinite;
+}
+
+.planet-card.traveling {
+  border-color: var(--warning);
+  animation: pulse 1s infinite;
+}
+
+/* ===== INVENTORY ===== */
+.inventory h3 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.inventory-bar {
+  height: 6px;
+  background: var(--bg-card);
+  border-radius: 3px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.inventory-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #a78bfa);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.equipment-section {
+  margin-bottom: 12px;
+  padding: 10px;
+  background: rgba(99,102,241,0.08);
+  border-radius: 10px;
+  border: 1px solid rgba(99,102,241,0.2);
+}
+
+.equipment-section h4 {
+  font-size: 0.75rem;
+  color: var(--accent);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.equipment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.equipped-item {
+  font-size: 0.8rem;
+}
+
+.item-effect {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.inventory-item {
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-icon {
+  font-size: 1.5rem;
+}
+
+.item-count {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.item-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.item-effect-text {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.item-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.btn-equip {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 6px;
+  background: var(--accent);
+  color: white;
+}
+
+.btn-discard {
+  padding: 4px 8px;
+  font-size: 0.7rem;
+  border-radius: 6px;
+  background: rgba(239,68,68,0.15);
+  color: var(--error);
+}
+
+.empty-inventory {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 24px;
+}
+
+/* ===== CRAFTING ===== */
+.crafting-table h3 {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+}
+
+.recipes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recipe-card {
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: all 0.2s;
+}
+
+.recipe-card.craftable {
+  border-color: var(--success);
+  background: rgba(34,197,94,0.05);
+}
+
+.recipe-card.locked {
+  opacity: 0.7;
+}
+
+.recipe-output {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.output-icon {
+  font-size: 1.8rem;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--bg-secondary);
+}
+
+.output-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.output-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.output-effect {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.recipe-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.recipe-ingredient {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  background: var(--bg-secondary);
+}
+
+.recipe-ingredient.have {
+  color: var(--success);
+}
+
+.recipe-ingredient.need {
+  color: var(--error);
+}
+
+.craft-button {
+  width: 100%;
+  padding: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--success), #16a34a);
+  color: white;
+  transition: all 0.2s;
+}
+
+.craft-button:disabled {
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.craft-button:hover:not(:disabled) {
+  transform: scale(1.01);
+  box-shadow: 0 2px 12px rgba(34,197,94,0.3);
+}
+
+/* ===== RARITY ===== */
+.rarity-common { border-color: var(--rarity-common); }
+.rarity-uncommon { border-color: var(--rarity-uncommon); }
+.rarity-rare { border-color: var(--rarity-rare); }
+.rarity-legendary { border-color: var(--rarity-legendary); box-shadow: 0 0 8px rgba(245,158,11,0.2); }
+
+.rarity-text-common { color: var(--rarity-common); font-size: 0.7rem; }
+.rarity-text-uncommon { color: var(--rarity-uncommon); font-size: 0.7rem; }
+.rarity-text-rare { color: var(--rarity-rare); font-size: 0.7rem; }
+.rarity-text-legendary { color: var(--rarity-legendary); font-size: 0.7rem; }
+
+.rarity-border-common { border: 2px solid var(--rarity-common); }
+.rarity-border-uncommon { border: 2px solid var(--rarity-uncommon); }
+.rarity-border-rare { border: 2px solid var(--rarity-rare); }
+.rarity-border-legendary { border: 2px solid var(--rarity-legendary); }
+
+/* ===== GAME LOG ===== */
+.game-log {
+  padding: 8px 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.stats-bar {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 6px 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.log-entries {
+  max-height: 100px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.log-entry {
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.log-success { color: var(--success); background: rgba(34,197,94,0.08); }
+.log-warning { color: var(--warning); background: rgba(245,158,11,0.08); }
+.log-error { color: var(--error); background: rgba(239,68,68,0.08); }
+.log-info { color: var(--accent); background: rgba(99,102,241,0.08); }
+
+/* ===== RESPONSIVE ===== */
+@media (min-width: 768px) {
+  .game-container {
+    border-left: 1px solid rgba(255,255,255,0.06);
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+}
+
+/* ===== STARS BACKGROUND ===== */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 30% 65%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.2), transparent),
+    radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 45% 50%, rgba(255,255,255,0.2), transparent),
+    radial-gradient(1px 1px at 75% 15%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 25% 35%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 85% 55%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(2px 2px at 5% 45%, rgba(255,255,255,0.15), transparent),
+    radial-gradient(2px 2px at 55% 75%, rgba(255,255,255,0.15), transparent),
+    radial-gradient(2px 2px at 95% 25%, rgba(255,255,255,0.15), transparent);
+  pointer-events: none;
+  z-index: -1;
+}
