@@ -1,4 +1,6 @@
-import { createContext, useContext, useReducer, useCallback } from 'react';
+import { createContext, useContext, useReducer, useCallback, useEffect, useRef } from 'react';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 import { PLANETS, ITEMS, RECIPES, INVENTORY_SIZE, TRAVEL_TIME_MS, MINE_COOLDOWN_MS } from '../data/gameData';
 
 const GameContext = createContext(null);
@@ -37,6 +39,21 @@ function removeFromInventory(inventory, itemId, amount = 1) {
 
 function gameReducer(state, action) {
   switch (action.type) {
+    case 'LOAD_SAVED': {
+      const { currentPlanetId, discoveredPlanets, inventory, equipment, craftedItems, stats } = action.payload;
+      const planet = PLANETS.find(p => p.id === currentPlanetId) || PLANETS[0];
+      return {
+        ...initialState,
+        currentPlanet: planet,
+        discoveredPlanets,
+        inventory,
+        equipment,
+        craftedItems,
+        stats,
+        log: [{ text: '¡Bienvenido de vuelta! Tu progreso ha sido restaurado.', type: 'info' }],
+      };
+    }
+
     case 'MINE_START':
       return { ...state, isMining: true };
 
@@ -151,6 +168,53 @@ function gameReducer(state, action) {
 
 export function GameProvider({ children }) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
+  const savedPlayer = useQuery(api.players.getMyPlayer);
+  const saveState = useMutation(api.players.saveGameState);
+
+  // Simple load-once: GameProvider remounts (via key in App.jsx) on auth change,
+  // so we only need to load once per mount.
+  const hasLoaded = useRef(false);
+  const skipNextSync = useRef(false);
+
+  useEffect(() => {
+    if (savedPlayer === undefined) return; // still loading
+    if (hasLoaded.current) return; // already loaded this mount
+    hasLoaded.current = true;
+    if (savedPlayer !== null) {
+      skipNextSync.current = true;
+      dispatch({ type: 'LOAD_SAVED', payload: savedPlayer });
+    }
+  }, [savedPlayer]);
+
+  // Sync to Convex after significant state changes
+  useEffect(() => {
+    if (!hasLoaded.current) return; // don't sync before initial load
+    if (state.isMining || state.isTraveling) return; // don't sync mid-action
+
+    if (skipNextSync.current) {
+      skipNextSync.current = false;
+      return;
+    }
+
+    saveState({
+      currentPlanetId: state.currentPlanet.id,
+      discoveredPlanets: state.discoveredPlanets,
+      inventory: state.inventory,
+      equipment: state.equipment,
+      craftedItems: state.craftedItems,
+      stats: state.stats,
+    });
+  }, [
+    state.inventory,
+    state.equipment,
+    state.craftedItems,
+    state.discoveredPlanets,
+    state.currentPlanet,
+    state.stats,
+    state.isMining,
+    state.isTraveling,
+    saveState,
+  ]);
 
   const mine = useCallback(() => {
     if (state.isMining || state.isTraveling) return;
