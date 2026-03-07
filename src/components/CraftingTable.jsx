@@ -1,11 +1,36 @@
-import { ITEMS, RECIPES, RARITY_COLORS } from '../data/gameData';
+/**
+ * @fileoverview Componente de mesa de crafteo.
+ *
+ * Muestra todas las recetas disponibles con sus ingredientes requeridos
+ * y permite craftear ítems cuando se tienen los materiales necesarios.
+ *
+ * @module CraftingTable
+ */
+
+import { ITEMS, RECIPES } from '../data/gameData';
 import { useGame } from '../context/GameContext';
 import { useHaptics } from '../hooks/useHaptics';
 
+/**
+ * Mesa de crafteo interactiva que lista las recetas del juego.
+ *
+ * Cada receta muestra el ítem de salida con su rareza y efecto,
+ * los ingredientes requeridos con indicador de disponibilidad (have/need),
+ * y un botón de crafteo que se habilita solo cuando se tienen todos
+ * los materiales.
+ *
+ * @returns {import('react').JSX.Element}
+ */
 export default function CraftingTable() {
   const { inventory, canCraft, craft } = useGame();
   const haptics = useHaptics();
 
+  /**
+   * Intenta craftear una receta con feedback háptico.
+   * Reproduce feedback de éxito o error según disponibilidad de materiales.
+   *
+   * @param {import('../data/gameData').Recipe} recipe - Receta a craftear.
+   */
   const handleCraft = (recipe) => {
     if (canCraft(recipe)) {
       haptics.craft();

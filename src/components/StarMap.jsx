@@ -1,11 +1,33 @@
+/**
+ * @fileoverview Componente de mapa estelar para navegación entre planetas.
+ *
+ * Muestra una grilla de planetas con sistema de niebla de guerra
+ * (fog-of-war) donde los planetas no descubiertos aparecen ocultos.
+ *
+ * @module StarMap
+ */
+
 import { PLANETS } from '../data/gameData';
 import { useGame } from '../context/GameContext';
 import { useHaptics } from '../hooks/useHaptics';
 
+/**
+ * Mapa estelar interactivo que permite viajar entre planetas.
+ *
+ * Cada planeta se muestra como una tarjeta con su emoji y nombre.
+ * Los planetas no descubiertos muestran "???" hasta que el jugador los visite.
+ * El planeta actual se resalta y no se puede seleccionar como destino.
+ *
+ * @returns {import('react').JSX.Element}
+ */
 export default function StarMap() {
   const { currentPlanet, isTraveling, travelTarget, travel, discoveredPlanets } = useGame();
   const haptics = useHaptics();
 
+  /**
+   * Inicia el viaje a un planeta con feedback háptico.
+   * @param {string} planetId - ID del planeta destino.
+   */
   const handleTravel = (planetId) => {
     haptics.travel();
     travel(planetId);
