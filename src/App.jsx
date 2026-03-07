@@ -73,7 +73,9 @@ export default function App() {
     if (isLoading || didInitAuth.current) return;
     didInitAuth.current = true;
     if (!isAuthenticated) {
-      signIn('anonymous');
+      void signIn('anonymous').catch(error => {
+        console.error('Anonymous sign-in failed', error);
+      });
     }
   }, [isLoading, isAuthenticated, signIn]);
 

@@ -42,13 +42,22 @@ function gameReducer(state, action) {
     case 'LOAD_SAVED': {
       const { currentPlanetId, discoveredPlanets, inventory, equipment, craftedItems, stats } = action.payload;
       const planet = PLANETS.find(p => p.id === currentPlanetId) || PLANETS[0];
+      const safeInventory = Object.fromEntries(
+        Object.entries(inventory || {}).filter(([itemId]) => ITEMS[itemId])
+      );
+      const safeEquipment = Array.isArray(equipment)
+        ? equipment.filter(itemId => ITEMS[itemId])
+        : [];
+      const safeCraftedItems = Array.isArray(craftedItems)
+        ? craftedItems.filter(itemId => ITEMS[itemId])
+        : [];
       return {
         ...initialState,
         currentPlanet: planet,
         discoveredPlanets,
-        inventory,
-        equipment,
-        craftedItems,
+        inventory: safeInventory,
+        equipment: safeEquipment,
+        craftedItems: safeCraftedItems,
         stats,
         log: [{ text: '¡Bienvenido de vuelta! Tu progreso ha sido restaurado.', type: 'info' }],
       };
@@ -171,8 +180,8 @@ export function GameProvider({ children }) {
   const savedPlayer = useQuery(api.players.getMyPlayer);
   const saveState = useMutation(api.players.saveGameState);
 
-  // Simple load-once: GameProvider remounts (via key in App.jsx) on auth change,
-  // so we only need to load once per mount.
+  // Simple load-once: auth changes trigger a full page reload, so GameProvider
+  // mounts fresh and we only need to load once per mount.
   const hasLoaded = useRef(false);
   const skipNextSync = useRef(false);
 
@@ -180,8 +189,10 @@ export function GameProvider({ children }) {
     if (savedPlayer === undefined) return; // still loading
     if (hasLoaded.current) return; // already loaded this mount
     hasLoaded.current = true;
+    // Skip the first sync after initial load for both new and existing players.
+    // For existing players, also load the saved state into the reducer.
+    skipNextSync.current = true;
     if (savedPlayer !== null) {
-      skipNextSync.current = true;
       dispatch({ type: 'LOAD_SAVED', payload: savedPlayer });
     }
   }, [savedPlayer]);
@@ -203,6 +214,8 @@ export function GameProvider({ children }) {
       equipment: state.equipment,
       craftedItems: state.craftedItems,
       stats: state.stats,
+    }).catch((error) => {
+      console.error('Failed to save game state:', error);
     });
   }, [
     state.inventory,

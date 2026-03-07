@@ -73,7 +73,16 @@ export default function AuthUpgrade() {
                   Tu progreso se guarda automáticamente en <strong>{me.email}</strong>
                 </p>
                 <button
-                  onClick={async () => { await signOut(); await signIn('anonymous'); window.location.reload(); }}
+                  onClick={async () => {
+                    try {
+                      await signOut();
+                      await signIn('anonymous');
+                      window.location.reload();
+                    } catch (err) {
+                      console.error('Error during sign-out flow', err);
+                      setError('Ocurrió un problema al cerrar sesión. Inténtalo de nuevo.');
+                    }
+                  }}
                   className="auth-btn secondary"
                 >
                   Cerrar sesión
