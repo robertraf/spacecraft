@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useConvexAuth } from 'convex/react';
+import { useAuthActions } from '@convex-dev/auth/react';
 import { GameProvider } from './context/GameContext';
 import PlanetView from './components/PlanetView';
 import StarMap from './components/StarMap';
 import Inventory from './components/Inventory';
 import CraftingTable from './components/CraftingTable';
 import GameLog from './components/GameLog';
+import AuthUpgrade from './components/AuthUpgrade';
 import './App.css';
 
 const TABS = [
@@ -21,8 +24,13 @@ function GameUI() {
   return (
     <div className="game-container">
       <header className="game-header">
-        <h1>🚀 SpaceCraft</h1>
-        <p className="subtitle">Explora. Mina. Craftea.</p>
+        <div className="header-row">
+          <div>
+            <h1>🚀 SpaceCraft</h1>
+            <p className="subtitle">Explora. Mina. Craftea.</p>
+          </div>
+          <AuthUpgrade />
+        </div>
       </header>
 
       <main className="game-main">
@@ -46,7 +54,35 @@ function GameUI() {
   );
 }
 
+function LoadingScreen() {
+  return (
+    <div className="loading-screen">
+      <div className="loading-planet">🚀</div>
+      <p>Cargando SpaceCraft...</p>
+    </div>
+  );
+}
+
 export default function App() {
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const { signIn } = useAuthActions();
+
+  // Auto sign in anonymously on first visit only
+  const didInitAuth = useRef(false);
+  useEffect(() => {
+    if (isLoading || didInitAuth.current) return;
+    didInitAuth.current = true;
+    if (!isAuthenticated) {
+      void signIn('anonymous').catch(error => {
+        console.error('Anonymous sign-in failed', error);
+      });
+    }
+  }, [isLoading, isAuthenticated, signIn]);
+
+  if (isLoading || !isAuthenticated) {
+    return <LoadingScreen />;
+  }
+
   return (
     <GameProvider>
       <GameUI />

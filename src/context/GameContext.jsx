@@ -1,4 +1,6 @@
-import { createContext, useContext, useReducer, useCallback } from 'react';
+import { createContext, useContext, useReducer, useCallback, useEffect, useRef } from 'react';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 import { PLANETS, ITEMS, RECIPES, INVENTORY_SIZE, TRAVEL_TIME_MS, MINE_COOLDOWN_MS } from '../data/gameData';
 
 const GameContext = createContext(null);
@@ -37,6 +39,30 @@ function removeFromInventory(inventory, itemId, amount = 1) {
 
 function gameReducer(state, action) {
   switch (action.type) {
+    case 'LOAD_SAVED': {
+      const { currentPlanetId, discoveredPlanets, inventory, equipment, craftedItems, stats } = action.payload;
+      const planet = PLANETS.find(p => p.id === currentPlanetId) || PLANETS[0];
+      const safeInventory = Object.fromEntries(
+        Object.entries(inventory || {}).filter(([itemId]) => ITEMS[itemId])
+      );
+      const safeEquipment = Array.isArray(equipment)
+        ? equipment.filter(itemId => ITEMS[itemId])
+        : [];
+      const safeCraftedItems = Array.isArray(craftedItems)
+        ? craftedItems.filter(itemId => ITEMS[itemId])
+        : [];
+      return {
+        ...initialState,
+        currentPlanet: planet,
+        discoveredPlanets,
+        inventory: safeInventory,
+        equipment: safeEquipment,
+        craftedItems: safeCraftedItems,
+        stats,
+        log: [{ text: '¡Bienvenido de vuelta! Tu progreso ha sido restaurado.', type: 'info' }],
+      };
+    }
+
     case 'MINE_START':
       return { ...state, isMining: true };
 
@@ -151,6 +177,57 @@ function gameReducer(state, action) {
 
 export function GameProvider({ children }) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
+  const savedPlayer = useQuery(api.players.getMyPlayer);
+  const saveState = useMutation(api.players.saveGameState);
+
+  // Simple load-once: auth changes trigger a full page reload, so GameProvider
+  // mounts fresh and we only need to load once per mount.
+  const hasLoaded = useRef(false);
+  const skipNextSync = useRef(false);
+
+  useEffect(() => {
+    if (savedPlayer === undefined) return; // still loading
+    if (hasLoaded.current) return; // already loaded this mount
+    hasLoaded.current = true;
+    // Skip the first sync after initial load for both new and existing players.
+    // For existing players, also load the saved state into the reducer.
+    skipNextSync.current = true;
+    if (savedPlayer !== null) {
+      dispatch({ type: 'LOAD_SAVED', payload: savedPlayer });
+    }
+  }, [savedPlayer]);
+
+  // Sync to Convex after significant state changes
+  useEffect(() => {
+    if (!hasLoaded.current) return; // don't sync before initial load
+    if (state.isMining || state.isTraveling) return; // don't sync mid-action
+
+    if (skipNextSync.current) {
+      skipNextSync.current = false;
+      return;
+    }
+
+    saveState({
+      currentPlanetId: state.currentPlanet.id,
+      discoveredPlanets: state.discoveredPlanets,
+      inventory: state.inventory,
+      equipment: state.equipment,
+      craftedItems: state.craftedItems,
+      stats: state.stats,
+    }).catch((error) => {
+      console.error('Failed to save game state:', error);
+    });
+  }, [
+    state.inventory,
+    state.equipment,
+    state.craftedItems,
+    state.discoveredPlanets,
+    state.currentPlanet,
+    state.stats,
+    state.isMining,
+    state.isTraveling,
+    saveState,
+  ]);
 
   const mine = useCallback(() => {
     if (state.isMining || state.isTraveling) return;
