@@ -355,8 +355,9 @@
   background: rgba(99,102,241,0.1);
 }
 
-.planet-card.undiscovered {
-  opacity: 0.5;
+.planet-card.unvisited {
+  border-style: dashed;
+  border-color: rgba(255,255,255,0.12);
 }
 
 .planet-card:disabled {
@@ -370,6 +371,26 @@
 .planet-card-name {
   font-size: 0.8rem;
   font-weight: 600;
+}
+
+.planet-card-danger {
+  font-size: 0.6rem;
+  line-height: 1;
+  letter-spacing: -1px;
+  opacity: 0.85;
+}
+
+.planet-card-resources {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.resource-mini-icon {
+  font-size: 0.8rem;
+  line-height: 1;
 }
 
 .here-badge {

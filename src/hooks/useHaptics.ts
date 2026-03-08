@@ -17,6 +17,7 @@ import { useRef, useCallback } from 'react';
 export function useHaptics() {
   const { trigger } = useWebHaptics({ debug: false });
   const drillIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const travelIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopDrill = useCallback(() => {
     if (drillIntervalRef.current) {
@@ -44,6 +45,34 @@ export function useHaptics() {
     }, 100);
   }, [trigger, stopDrill]);
 
+  const stopTravelPulse = useCallback(() => {
+    if (travelIntervalRef.current) {
+      clearInterval(travelIntervalRef.current);
+      travelIntervalRef.current = null;
+    }
+    if (navigator.vibrate) navigator.vibrate(0);
+  }, []);
+
+  const travelPulse = useCallback(() => {
+    stopTravelPulse();
+
+    if (navigator.vibrate) {
+      // Rhythmic pulse for ~4.5 s: 40 ms vibrate, 260 ms pause
+      const pattern: number[] = [];
+      for (let i = 0; i < 15; i++) {
+        pattern.push(40, 260);
+      }
+      navigator.vibrate(pattern);
+    }
+
+    let count = 0;
+    travelIntervalRef.current = setInterval(() => {
+      trigger('light');
+      count++;
+      if (count >= 15) stopTravelPulse();
+    }, 300);
+  }, [trigger, stopTravelPulse]);
+
   return {
     mine: () => trigger('light'),
     mineSuccess: () => trigger('success'),
@@ -51,6 +80,8 @@ export function useHaptics() {
     craft: () => trigger('success'),
     travel: () => trigger('warning'),
     travelArrive: () => trigger('success'),
+    travelPulse,
+    stopTravelPulse,
     equip: () => trigger('light'),
     tap: () => trigger('light'),
     error: () => trigger('error'),
