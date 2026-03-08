@@ -17,9 +17,6 @@ export const GRID_COLS = 9;
 /** Grid height (rows). */
 export const GRID_ROWS = 12;
 
-/** Base interval for the game tick (ms). */
-export const BASE_TICK_MS = 600;
-
 /** How often aliens move down one row (in ticks). */
 export const ALIEN_DESCENT_TICKS = 8;
 

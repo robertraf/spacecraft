@@ -1,8 +1,9 @@
 /**
- * @fileoverview Space Invaders battle mode component.
+ * @fileoverview Space Invaders battle mode — Canvas 2D + requestAnimationFrame.
  *
- * Renders a grid-based Space Invaders minigame using CSS grid and emojis.
- * Integrates with the main game via equipment bonuses and resource rewards.
+ * Uses HTML Canvas for rendering and mutable refs for game state so the
+ * React tree is never re-rendered during gameplay. The only React state
+ * is `uiPhase` which drives the overlay UI (start / wave-clear / game-over).
  *
  * @module SpaceInvaders
  */
@@ -15,7 +16,6 @@ import { useSound } from '../hooks/useSound';
 import {
   GRID_COLS,
   GRID_ROWS,
-  BASE_TICK_MS,
   ALIEN_DESCENT_TICKS,
   ALIEN_FIRE_CHANCE,
   BASE_LIVES,
@@ -25,15 +25,25 @@ import {
   getEquipmentBonuses,
   calculateRewards,
   type EnemyType,
-  type BattleReward,
 } from '../data/battleData';
 
 // ---------------------------------------------------------------------------
-// Types
+// Canvas constants
+// ---------------------------------------------------------------------------
+
+const CANVAS_W = 360;
+const CANVAS_H = 480;
+const CELL_W = CANVAS_W / GRID_COLS;
+const CELL_H = CANVAS_H / GRID_ROWS;
+
+/** Game‑logic tick interval (ms). Rendering runs at screen refresh rate. */
+const BASE_TICK_MS = 80;
+
+// ---------------------------------------------------------------------------
+// Internal mutable types
 // ---------------------------------------------------------------------------
 
 interface Alien {
-  id: number;
   col: number;
   row: number;
   type: EnemyType;
@@ -42,18 +52,16 @@ interface Alien {
 }
 
 interface Bullet {
-  id: number;
   col: number;
-  row: number;
-  direction: 'up' | 'down';
-  piercing?: boolean;
+  /** Pixel‑level Y for smooth movement. */
+  y: number;
+  piercing: boolean;
   damage: number;
+  dy: number; // pixels per frame (negative = up)
 }
 
-type GamePhase = 'idle' | 'playing' | 'wave-clear' | 'game-over' | 'rewards';
-
-interface BattleState {
-  phase: GamePhase;
+interface GameState {
+  phase: 'idle' | 'playing' | 'wave-clear' | 'game-over';
   wave: number;
   score: number;
   lives: number;
@@ -62,18 +70,16 @@ interface BattleState {
   playerBullets: Bullet[];
   alienBullets: Bullet[];
   tickCount: number;
-  alienDirection: 1 | -1;
-  rewards: BattleReward[];
-  maxBulletsOnScreen: number;
-  piercing: boolean;
-  damageMultiplier: number;
-  shipSpeed: number;
-  teleportCooldown: number;
-  teleportTimer: number;
+  alienDir: 1 | -1;
   highScore: number;
+  // bonuses snapshot
+  maxBullets: number;
+  piercing: boolean;
+  dmgMul: number;
+  shipSpeed: number;
+  teleportCD: number;
+  teleportTimer: number;
 }
-
-let nextId = 1;
 
 // ---------------------------------------------------------------------------
 // Component
@@ -84,418 +90,419 @@ export default function SpaceInvaders() {
   const { currentPlanet, equipment, addBattleRewards } = useGame();
   const haptics = useHaptics();
   const sound = useSound();
-  const gameRef = useRef<BattleState | null>(null);
-  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const bonuses = getEquipmentBonuses(equipment);
 
-  const createInitialState = useCallback((): BattleState => {
-    return {
-      phase: 'idle',
-      wave: 0,
-      score: 0,
-      lives: BASE_LIVES + bonuses.extraLives,
-      shipCol: Math.floor(GRID_COLS / 2),
-      aliens: [],
-      playerBullets: [],
-      alienBullets: [],
-      tickCount: 0,
-      alienDirection: 1,
-      rewards: [],
-      maxBulletsOnScreen: 1 + bonuses.extraBullets,
-      piercing: bonuses.piercing,
-      damageMultiplier: bonuses.damageMultiplier,
-      shipSpeed: bonuses.shipSpeed,
-      teleportCooldown: bonuses.teleportCooldown,
-      teleportTimer: 0,
-      highScore: 0,
-    };
-  }, [bonuses]);
+  // Canvas ref
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [state, setState] = useState<BattleState>(createInitialState);
+  // Mutable game state — never triggers React re‑renders
+  const gs = useRef<GameState>({
+    phase: 'idle', wave: 0, score: 0, lives: BASE_LIVES,
+    shipCol: Math.floor(GRID_COLS / 2),
+    aliens: [], playerBullets: [], alienBullets: [],
+    tickCount: 0, alienDir: 1, highScore: 0,
+    maxBullets: 1 + bonuses.extraBullets,
+    piercing: bonuses.piercing,
+    dmgMul: bonuses.damageMultiplier,
+    shipSpeed: bonuses.shipSpeed,
+    teleportCD: bonuses.teleportCooldown,
+    teleportTimer: 0,
+  });
 
-  // Keep ref in sync
-  useEffect(() => {
-    gameRef.current = state;
-  }, [state]);
+  // Input state — accumulated between frames
+  const keysDown = useRef<Set<string>>(new Set());
 
-  // Cleanup interval on unmount
-  useEffect(() => {
-    return () => {
-      if (tickRef.current) clearInterval(tickRef.current);
-    };
-  }, []);
+  // Animation handles
+  const rafId = useRef(0);
+  const tickTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // React state — only for overlay UI
+  const [uiPhase, setUiPhase] = useState<'idle' | 'playing' | 'wave-clear' | 'game-over'>('idle');
+  const [uiScore, setUiScore] = useState(0);
+  const [uiWave, setUiWave] = useState(0);
+  const [uiLives, setUiLives] = useState(BASE_LIVES);
+  const [uiHighScore, setUiHighScore] = useState(0);
 
   // ---------------------------------------------------------------------------
-  // Spawn aliens for a wave
+  // Spawn helpers
   // ---------------------------------------------------------------------------
   const spawnWave = useCallback((wave: number): Alien[] => {
-    const config = getWaveConfig(wave);
-    const enemyTypes = PLANET_ENEMIES[currentPlanet.id] ?? PLANET_ENEMIES['terra-nova'];
+    const cfg = getWaveConfig(wave);
+    const types = PLANET_ENEMIES[currentPlanet.id] ?? PLANET_ENEMIES['terra-nova'];
     const aliens: Alien[] = [];
-    const startCol = Math.floor((GRID_COLS - config.cols) / 2);
-
-    for (let row = 0; row < config.rows; row++) {
-      for (let col = 0; col < config.cols; col++) {
-        const type = enemyTypes[row % enemyTypes.length];
-        aliens.push({
-          id: nextId++,
-          col: startCol + col,
-          row: row + 1,
-          type,
-          hp: type.hp,
-          maxHp: type.hp,
-        });
+    const startCol = Math.floor((GRID_COLS - cfg.cols) / 2);
+    for (let r = 0; r < cfg.rows; r++) {
+      for (let c = 0; c < cfg.cols; c++) {
+        const tp = types[r % types.length];
+        aliens.push({ col: startCol + c, row: r + 1, type: tp, hp: tp.hp, maxHp: tp.hp });
       }
     }
     return aliens;
   }, [currentPlanet.id]);
 
   // ---------------------------------------------------------------------------
-  // Start game
+  // Render frame (Canvas 2D)
   // ---------------------------------------------------------------------------
-  const startGame = useCallback(() => {
-    if (tickRef.current) clearInterval(tickRef.current);
+  const drawFrame = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const s = gs.current;
 
-    const newState: BattleState = {
-      ...createInitialState(),
-      phase: 'playing',
-      wave: 1,
-      aliens: spawnWave(1),
-      highScore: state.highScore,
-    };
-    setState(newState);
-    haptics.tap();
-    sound.mineHit();
+    // Clear
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-    const waveConfig = getWaveConfig(1);
-    const tickMs = BASE_TICK_MS * waveConfig.speedMultiplier;
+    // Grid lines (subtle)
+    ctx.strokeStyle = 'rgba(99, 102, 241, 0.06)';
+    ctx.lineWidth = 0.5;
+    for (let c = 1; c < GRID_COLS; c++) {
+      ctx.beginPath();
+      ctx.moveTo(c * CELL_W, 0);
+      ctx.lineTo(c * CELL_W, CANVAS_H);
+      ctx.stroke();
+    }
 
-    tickRef.current = setInterval(() => {
-      setState(prev => gameTick(prev));
-    }, tickMs);
-  }, [createInitialState, spawnWave, state.highScore, haptics, sound]);
+    // Aliens
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (const a of s.aliens) {
+      const x = a.col * CELL_W + CELL_W / 2;
+      const y = a.row * CELL_H + CELL_H / 2;
+      const fontSize = a.hp < a.maxHp ? 18 : 22;
+      ctx.globalAlpha = a.hp < a.maxHp ? 0.6 : 1;
+      ctx.font = `${fontSize}px serif`;
+      ctx.fillText(a.type.emoji, x, y);
+    }
+    ctx.globalAlpha = 1;
+
+    // Player bullets
+    for (const b of s.playerBullets) {
+      const x = b.col * CELL_W + CELL_W / 2;
+      ctx.fillStyle = '#22c55e';
+      ctx.shadowColor = '#22c55e';
+      ctx.shadowBlur = 8;
+      ctx.fillRect(x - 2, b.y, 4, 12);
+    }
+    ctx.shadowBlur = 0;
+
+    // Alien bullets
+    for (const b of s.alienBullets) {
+      const x = b.col * CELL_W + CELL_W / 2;
+      ctx.fillStyle = '#ef4444';
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.arc(x, b.y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+
+    // Ship
+    const shipX = s.shipCol * CELL_W + CELL_W / 2;
+    const shipY = (GRID_ROWS - 1) * CELL_H + CELL_H / 2;
+    ctx.font = '26px serif';
+    ctx.shadowColor = 'rgba(99, 102, 241, 0.6)';
+    ctx.shadowBlur = 10;
+    ctx.fillText('🚀', shipX, shipY);
+    ctx.shadowBlur = 0;
+
+    // HUD bar at top
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(0, 0, CANVAS_W, 22);
+    ctx.font = 'bold 11px monospace';
+    ctx.fillStyle = '#fbbf24';
+    ctx.textAlign = 'left';
+    ctx.fillText(`SCORE ${s.score}`, 6, 15);
+    ctx.fillStyle = '#818cf8';
+    ctx.textAlign = 'center';
+    ctx.fillText(`WAVE ${s.wave}`, CANVAS_W / 2, 15);
+    ctx.fillStyle = '#ef4444';
+    ctx.textAlign = 'right';
+    ctx.fillText('❤️'.repeat(Math.max(0, s.lives)), CANVAS_W - 6, 15);
+
+    ctx.textAlign = 'center';
+  }, []);
 
   // ---------------------------------------------------------------------------
-  // Next wave
+  // Render loop (requestAnimationFrame)
   // ---------------------------------------------------------------------------
-  const nextWave = useCallback(() => {
-    if (tickRef.current) clearInterval(tickRef.current);
+  const renderLoop = useCallback(() => {
+    const s = gs.current;
+    if (s.phase !== 'playing') return;
 
-    const wave = state.wave + 1;
-    setState(prev => ({
-      ...prev,
-      phase: 'playing',
-      wave,
-      aliens: spawnWave(wave),
-      playerBullets: [],
-      alienBullets: [],
-      tickCount: 0,
-      alienDirection: 1,
-      shipCol: Math.floor(GRID_COLS / 2),
-    }));
+    // Move bullets smoothly every frame
+    for (const b of s.playerBullets) b.y += b.dy;
+    for (const b of s.alienBullets) b.y += b.dy;
 
-    const waveConfig = getWaveConfig(wave);
-    const tickMs = BASE_TICK_MS * waveConfig.speedMultiplier;
+    // Remove off‑screen
+    s.playerBullets = s.playerBullets.filter(b => b.y > -10);
+    s.alienBullets = s.alienBullets.filter(b => b.y < CANVAS_H + 10);
 
-    tickRef.current = setInterval(() => {
-      setState(prev => gameTick(prev));
-    }, tickMs);
-  }, [state.wave, spawnWave]);
+    // Process keyboard input
+    if (keysDown.current.has('ArrowLeft') || keysDown.current.has('a')) {
+      s.shipCol = Math.max(0, s.shipCol - s.shipSpeed);
+    }
+    if (keysDown.current.has('ArrowRight') || keysDown.current.has('d')) {
+      s.shipCol = Math.min(GRID_COLS - 1, s.shipCol + s.shipSpeed);
+    }
+
+    drawFrame();
+    rafId.current = requestAnimationFrame(renderLoop);
+  }, [drawFrame]);
 
   // ---------------------------------------------------------------------------
-  // Game tick
+  // Game‑logic tick (fixed interval, decoupled from rendering)
   // ---------------------------------------------------------------------------
-  function gameTick(s: BattleState): BattleState {
-    if (s.phase !== 'playing') return s;
+  const gameTick = useCallback(() => {
+    const s = gs.current;
+    if (s.phase !== 'playing') return;
+    s.tickCount++;
 
-    let { aliens, playerBullets, alienBullets, lives, score, tickCount, alienDirection } = {
-      aliens: [...s.aliens],
-      playerBullets: [...s.playerBullets],
-      alienBullets: [...s.alienBullets],
-      lives: s.lives,
-      score: s.score,
-      tickCount: s.tickCount + 1,
-      alienDirection: s.alienDirection,
-    };
-
-    // --- Move player bullets up ---
-    playerBullets = playerBullets
-      .map(b => ({ ...b, row: b.row - 1 }))
-      .filter(b => b.row >= 0);
-
-    // --- Move alien bullets down ---
-    alienBullets = alienBullets
-      .map(b => ({ ...b, row: b.row + 1 }))
-      .filter(b => b.row < GRID_ROWS);
-
-    // --- Check player bullet ↔ alien collisions ---
-    const bulletsToRemove = new Set<number>();
-    const aliensToRemove = new Set<number>();
-
-    for (const bullet of playerBullets) {
-      for (const alien of aliens) {
-        if (alien.col === bullet.col && alien.row === bullet.row && !aliensToRemove.has(alien.id)) {
-          alien.hp -= bullet.damage;
-          if (alien.hp <= 0) {
-            aliensToRemove.add(alien.id);
-            score += alien.type.score;
+    // --- Collisions: player bullets ↔ aliens ---
+    for (let bi = s.playerBullets.length - 1; bi >= 0; bi--) {
+      const b = s.playerBullets[bi];
+      const bRow = Math.round(b.y / CELL_H);
+      for (let ai = s.aliens.length - 1; ai >= 0; ai--) {
+        const a = s.aliens[ai];
+        if (a.col === b.col && Math.abs(a.row - bRow) <= 0) {
+          a.hp -= b.damage;
+          if (a.hp <= 0) {
+            s.score += a.type.score;
+            s.aliens.splice(ai, 1);
           }
-          if (!bullet.piercing) {
-            bulletsToRemove.add(bullet.id);
+          if (!b.piercing) {
+            s.playerBullets.splice(bi, 1);
+            break;
           }
-          break;
         }
       }
     }
 
-    playerBullets = playerBullets.filter(b => !bulletsToRemove.has(b.id));
-    aliens = aliens.filter(a => !aliensToRemove.has(a.id));
-
-    // --- Regeneration for verdantis enemies ---
-    for (const alien of aliens) {
-      if (alien.type.regenerates && alien.hp < alien.maxHp && tickCount % 10 === 0) {
-        alien.hp = Math.min(alien.hp + 1, alien.maxHp);
+    // --- Collisions: alien bullets ↔ player ---
+    const shipY = (GRID_ROWS - 1) * CELL_H + CELL_H / 2;
+    for (let bi = s.alienBullets.length - 1; bi >= 0; bi--) {
+      const b = s.alienBullets[bi];
+      if (Math.abs(b.y - shipY) < CELL_H * 0.6 && b.col === s.shipCol) {
+        s.lives--;
+        s.alienBullets.splice(bi, 1);
+        sound.explosion();
+        haptics.explosion();
       }
     }
 
-    // --- Check alien bullet ↔ player collisions ---
-    for (const bullet of alienBullets) {
-      if (bullet.row === GRID_ROWS - 1 && bullet.col === s.shipCol) {
-        lives--;
-        alienBullets = alienBullets.filter(b => b.id !== bullet.id);
+    // --- Regeneration ---
+    if (s.tickCount % 10 === 0) {
+      for (const a of s.aliens) {
+        if (a.type.regenerates && a.hp < a.maxHp) a.hp++;
       }
     }
 
     // --- Move aliens ---
-    if (tickCount % ALIEN_DESCENT_TICKS === 0 && aliens.length > 0) {
-      const minCol = Math.min(...aliens.map(a => a.col));
-      const maxCol = Math.max(...aliens.map(a => a.col));
+    if (s.tickCount % ALIEN_DESCENT_TICKS === 0 && s.aliens.length > 0) {
+      let minC = GRID_COLS, maxC = 0;
+      for (const a of s.aliens) { if (a.col < minC) minC = a.col; if (a.col > maxC) maxC = a.col; }
 
-      if ((alienDirection === 1 && maxCol >= GRID_COLS - 1) ||
-          (alienDirection === -1 && minCol <= 0)) {
-        alienDirection = (alienDirection * -1) as 1 | -1;
-        aliens = aliens.map(a => ({ ...a, row: a.row + 1 }));
+      if ((s.alienDir === 1 && maxC >= GRID_COLS - 1) || (s.alienDir === -1 && minC <= 0)) {
+        s.alienDir = (s.alienDir * -1) as 1 | -1;
+        for (const a of s.aliens) a.row++;
       } else {
-        aliens = aliens.map(a => ({ ...a, col: a.col + alienDirection }));
+        for (const a of s.aliens) a.col += s.alienDir;
       }
     }
 
-    // --- Check if aliens reached the bottom ---
-    if (aliens.some(a => a.row >= GRID_ROWS - 2)) {
-      if (tickRef.current) clearInterval(tickRef.current);
-      const hs = Math.max(s.highScore, score);
-      return {
-        ...s,
-        phase: 'game-over',
-        aliens, playerBullets, alienBullets, lives, score, tickCount, alienDirection,
-        highScore: hs,
-        rewards: [],
-      };
+    // --- Aliens reached bottom ---
+    if (s.aliens.some(a => a.row >= GRID_ROWS - 2)) {
+      endGame(s);
+      return;
     }
 
-    // --- Alien shooting ---
-    for (const alien of aliens) {
-      if (Math.random() < ALIEN_FIRE_CHANCE * alien.type.fireRate) {
-        alienBullets.push({
-          id: nextId++,
-          col: alien.col,
-          row: alien.row + 1,
-          direction: 'down',
+    // --- Alien fire ---
+    for (const a of s.aliens) {
+      if (Math.random() < ALIEN_FIRE_CHANCE * a.type.fireRate) {
+        s.alienBullets.push({
+          col: a.col,
+          y: (a.row + 1) * CELL_H,
+          piercing: false,
           damage: 1,
+          dy: 4,
         });
       }
     }
 
-    // --- Check if wave cleared ---
-    if (aliens.length === 0) {
-      if (tickRef.current) clearInterval(tickRef.current);
-      score += WAVE_CLEAR_BONUS;
-      return {
-        ...s,
-        phase: 'wave-clear',
-        aliens, playerBullets: [], alienBullets: [], lives, score, tickCount, alienDirection,
-        highScore: Math.max(s.highScore, score),
-      };
+    // --- Wave cleared ---
+    if (s.aliens.length === 0) {
+      s.score += WAVE_CLEAR_BONUS;
+      s.phase = 'wave-clear';
+      s.highScore = Math.max(s.highScore, s.score);
+      stopLoop();
+      sound.waveClear();
+      haptics.craft();
+      syncUI(s);
+      return;
     }
 
-    // --- Check game over ---
-    if (lives <= 0) {
-      if (tickRef.current) clearInterval(tickRef.current);
-      return {
-        ...s,
-        phase: 'game-over',
-        aliens, playerBullets, alienBullets, lives: 0, score, tickCount, alienDirection,
-        highScore: Math.max(s.highScore, score),
-        rewards: [],
-      };
+    // --- Game over ---
+    if (s.lives <= 0) {
+      endGame(s);
+      return;
     }
 
-    return {
-      ...s,
-      aliens, playerBullets, alienBullets, lives, score, tickCount, alienDirection,
-    };
+    // Teleport cooldown
+    if (s.teleportTimer > 0) s.teleportTimer--;
+
+    // Sync HUD numbers less frequently (every 4th tick)
+    if (s.tickCount % 4 === 0) syncUI(s);
+  }, [sound, haptics]);
+
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+  function stopLoop() {
+    cancelAnimationFrame(rafId.current);
+    if (tickTimer.current) { clearInterval(tickTimer.current); tickTimer.current = null; }
   }
+
+  function endGame(s: GameState) {
+    s.phase = 'game-over';
+    s.highScore = Math.max(s.highScore, s.score);
+    stopLoop();
+    sound.explosion();
+    haptics.explosion();
+    syncUI(s);
+  }
+
+  function syncUI(s: GameState) {
+    setUiPhase(s.phase);
+    setUiScore(s.score);
+    setUiWave(s.wave);
+    setUiLives(s.lives);
+    setUiHighScore(s.highScore);
+  }
+
+  // Cleanup on unmount
+  useEffect(() => () => stopLoop(), []);
+
+  // ---------------------------------------------------------------------------
+  // Start / next wave
+  // ---------------------------------------------------------------------------
+  const startPlaying = useCallback((wave: number, keepScore = false) => {
+    stopLoop();
+    const s = gs.current;
+    s.phase = 'playing';
+    s.wave = wave;
+    s.aliens = spawnWave(wave);
+    s.playerBullets = [];
+    s.alienBullets = [];
+    s.tickCount = 0;
+    s.alienDir = 1;
+    s.shipCol = Math.floor(GRID_COLS / 2);
+    if (!keepScore) {
+      s.score = 0;
+      s.lives = BASE_LIVES + bonuses.extraLives;
+    }
+    s.maxBullets = 1 + bonuses.extraBullets;
+    s.piercing = bonuses.piercing;
+    s.dmgMul = bonuses.damageMultiplier;
+    s.shipSpeed = bonuses.shipSpeed;
+    s.teleportCD = bonuses.teleportCooldown;
+    s.teleportTimer = 0;
+
+    syncUI(s);
+
+    const waveCfg = getWaveConfig(wave);
+    const tickMs = Math.max(30, BASE_TICK_MS * waveCfg.speedMultiplier);
+    tickTimer.current = setInterval(gameTick, tickMs);
+    rafId.current = requestAnimationFrame(renderLoop);
+
+    haptics.tap();
+    sound.mineHit();
+  }, [spawnWave, bonuses, gameTick, renderLoop, haptics, sound]);
+
+  const startGame = useCallback(() => startPlaying(1), [startPlaying]);
+  const nextWave = useCallback(() => startPlaying(gs.current.wave + 1, true), [startPlaying]);
 
   // ---------------------------------------------------------------------------
   // Player actions
   // ---------------------------------------------------------------------------
-  const moveShip = useCallback((dir: -1 | 1) => {
-    setState(prev => {
-      if (prev.phase !== 'playing') return prev;
-      const newCol = Math.max(0, Math.min(GRID_COLS - 1, prev.shipCol + dir * prev.shipSpeed));
-      return { ...prev, shipCol: newCol };
+  const shoot = useCallback(() => {
+    const s = gs.current;
+    if (s.phase !== 'playing') return;
+    if (s.playerBullets.length >= s.maxBullets) return;
+    s.playerBullets.push({
+      col: s.shipCol,
+      y: (GRID_ROWS - 2) * CELL_H,
+      piercing: s.piercing,
+      damage: s.dmgMul,
+      dy: -7,
     });
+    sound.shoot();
+    haptics.shoot();
+  }, [sound, haptics]);
+
+  const moveShip = useCallback((dir: -1 | 1) => {
+    const s = gs.current;
+    if (s.phase !== 'playing') return;
+    s.shipCol = Math.max(0, Math.min(GRID_COLS - 1, s.shipCol + dir * s.shipSpeed));
     haptics.tap();
   }, [haptics]);
 
-  const shoot = useCallback(() => {
-    setState(prev => {
-      if (prev.phase !== 'playing') return prev;
-      if (prev.playerBullets.length >= prev.maxBulletsOnScreen) return prev;
-      sound.shoot();
-      haptics.shoot();
-      return {
-        ...prev,
-        playerBullets: [...prev.playerBullets, {
-          id: nextId++,
-          col: prev.shipCol,
-          row: GRID_ROWS - 2,
-          direction: 'up' as const,
-          piercing: prev.piercing,
-          damage: prev.damageMultiplier,
-        }],
-      };
-    });
-  }, [sound, haptics]);
-
   const teleport = useCallback(() => {
-    setState(prev => {
-      if (prev.phase !== 'playing' || prev.teleportCooldown === 0 || prev.teleportTimer > 0) return prev;
-      const newCol = Math.floor(Math.random() * GRID_COLS);
-      haptics.tap();
-      return { ...prev, shipCol: newCol, teleportTimer: prev.teleportCooldown };
-    });
+    const s = gs.current;
+    if (s.phase !== 'playing' || s.teleportCD === 0 || s.teleportTimer > 0) return;
+    s.shipCol = Math.floor(Math.random() * GRID_COLS);
+    s.teleportTimer = s.teleportCD;
+    haptics.tap();
   }, [haptics]);
-
-  // Reduce teleport timer each tick
-  useEffect(() => {
-    if (state.phase === 'playing' && state.teleportTimer > 0) {
-      const timer = setTimeout(() => {
-        setState(prev => ({ ...prev, teleportTimer: Math.max(0, prev.teleportTimer - 1) }));
-      }, BASE_TICK_MS);
-      return () => clearTimeout(timer);
-    }
-  }, [state.phase, state.teleportTimer]);
 
   // ---------------------------------------------------------------------------
   // Collect rewards
   // ---------------------------------------------------------------------------
   const collectRewards = useCallback(() => {
-    const rewards = calculateRewards(
-      state.wave,
-      currentPlanet.resources,
-    );
-    if (rewards.length > 0) {
-      addBattleRewards(rewards);
-    }
-    setState(prev => ({ ...prev, phase: 'idle', rewards }));
+    const rewards = calculateRewards(gs.current.wave, currentPlanet.resources);
+    if (rewards.length > 0) addBattleRewards(rewards);
+    gs.current.phase = 'idle';
+    setUiPhase('idle');
     haptics.craft();
-  }, [currentPlanet, state.wave, addBattleRewards, haptics]);
+  }, [currentPlanet, addBattleRewards, haptics]);
 
   // ---------------------------------------------------------------------------
-  // Touch controls
+  // Input: keyboard
   // ---------------------------------------------------------------------------
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  useEffect(() => {
+    const onDown = (e: KeyboardEvent) => {
+      keysDown.current.add(e.key);
+      if (e.key === ' ' || e.key === 'ArrowUp') { e.preventDefault(); shoot(); }
+      if (e.key === 't') teleport();
+    };
+    const onUp = (e: KeyboardEvent) => keysDown.current.delete(e.key);
+    window.addEventListener('keydown', onDown);
+    window.addEventListener('keyup', onUp);
+    return () => { window.removeEventListener('keydown', onDown); window.removeEventListener('keyup', onUp); };
+  }, [shoot, teleport]);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  // ---------------------------------------------------------------------------
+  // Input: touch (on canvas)
+  // ---------------------------------------------------------------------------
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStart.current = { x: t.clientX, y: t.clientY };
   }, []);
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (!touchStartRef.current) return;
-    const touch = e.changedTouches[0];
-    const dx = touch.clientX - touchStartRef.current.x;
-    const dy = touch.clientY - touchStartRef.current.y;
-    touchStartRef.current = null;
-
-    if (Math.abs(dy) > 30 && dy < 0) {
-      shoot();
-    } else if (Math.abs(dx) > 20) {
-      moveShip(dx > 0 ? 1 : -1);
-    } else {
-      shoot();
-    }
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStart.current.x;
+    const dy = t.clientY - touchStart.current.y;
+    touchStart.current = null;
+    if (Math.abs(dy) > 30 && dy < 0) { shoot(); }
+    else if (Math.abs(dx) > 20) { moveShip(dx > 0 ? 1 : -1); }
+    else { shoot(); }
   }, [shoot, moveShip]);
-
-  // Keyboard controls
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (state.phase !== 'playing') return;
-      switch (e.key) {
-        case 'ArrowLeft':
-        case 'a':
-          moveShip(-1);
-          break;
-        case 'ArrowRight':
-        case 'd':
-          moveShip(1);
-          break;
-        case ' ':
-        case 'ArrowUp':
-          e.preventDefault();
-          shoot();
-          break;
-        case 't':
-          teleport();
-          break;
-      }
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [state.phase, moveShip, shoot, teleport]);
-
-  // ---------------------------------------------------------------------------
-  // Render grid
-  // ---------------------------------------------------------------------------
-  const renderGrid = () => {
-    const cells: React.ReactNode[] = [];
-
-    for (let row = 0; row < GRID_ROWS; row++) {
-      for (let col = 0; col < GRID_COLS; col++) {
-        const alien = state.aliens.find(a => a.row === row && a.col === col);
-        const playerBullet = state.playerBullets.find(b => b.row === row && b.col === col);
-        const alienBullet = state.alienBullets.find(b => b.row === row && b.col === col);
-        const isShip = row === GRID_ROWS - 1 && col === state.shipCol;
-
-        let content = '';
-        let cellClass = 'si-cell';
-
-        if (alien) {
-          content = alien.type.emoji;
-          cellClass += ' si-alien';
-          if (alien.hp < alien.maxHp) cellClass += ' si-alien-damaged';
-        } else if (isShip) {
-          content = '🚀';
-          cellClass += ' si-ship';
-        } else if (playerBullet) {
-          content = '|';
-          cellClass += ' si-bullet-player';
-        } else if (alienBullet) {
-          content = '·';
-          cellClass += ' si-bullet-alien';
-        }
-
-        cells.push(
-          <div key={`${row}-${col}`} className={cellClass}>
-            {content}
-          </div>
-        );
-      }
-    }
-    return cells;
-  };
 
   // ---------------------------------------------------------------------------
   // Render
@@ -504,17 +511,19 @@ export default function SpaceInvaders() {
     <div className="space-invaders">
       <div className="si-header">
         <h3>👾 {t('battle.title')}</h3>
-        <div className="si-stats">
-          <span className="si-score">{t('battle.score')}: {state.score}</span>
-          <span className="si-wave">{t('battle.wave')}: {state.wave}</span>
-          <span className="si-lives">{'❤️'.repeat(Math.max(0, state.lives))}</span>
-        </div>
-        {state.highScore > 0 && (
-          <div className="si-high-score">{t('battle.highScore')}: {state.highScore}</div>
+        {uiPhase === 'playing' && (
+          <div className="si-stats">
+            <span className="si-score">{t('battle.score')}: {uiScore}</span>
+            <span className="si-wave">{t('battle.wave')}: {uiWave}</span>
+            <span className="si-lives">{'❤️'.repeat(Math.max(0, uiLives))}</span>
+          </div>
+        )}
+        {uiHighScore > 0 && (
+          <div className="si-high-score">{t('battle.highScore')}: {uiHighScore}</div>
         )}
       </div>
 
-      {state.phase === 'idle' && (
+      {uiPhase === 'idle' && (
         <div className="si-start-screen">
           <div className="si-start-planet">
             <span className="si-big-emoji">👾</span>
@@ -539,42 +548,32 @@ export default function SpaceInvaders() {
         </div>
       )}
 
-      {state.phase === 'playing' && (
+      {uiPhase === 'playing' && (
         <>
-          <div
-            className="si-grid"
-            style={{
-              gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`,
-              gridTemplateRows: `repeat(${GRID_ROWS}, 1fr)`,
-            }}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-          >
-            {renderGrid()}
-          </div>
-
+          <canvas
+            ref={canvasRef}
+            width={CANVAS_W}
+            height={CANVAS_H}
+            className="si-canvas"
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+          />
           <div className="si-controls">
             <button className="si-ctrl-btn" onClick={() => moveShip(-1)}>⬅️</button>
             <button className="si-ctrl-btn si-fire-btn" onClick={shoot}>🔥</button>
             <button className="si-ctrl-btn" onClick={() => moveShip(1)}>➡️</button>
-            {state.teleportCooldown > 0 && (
-              <button
-                className={`si-ctrl-btn si-teleport-btn ${state.teleportTimer > 0 ? 'cooldown' : ''}`}
-                onClick={teleport}
-                disabled={state.teleportTimer > 0}
-              >
-                ✨
-              </button>
+            {bonuses.teleportCooldown > 0 && (
+              <button className="si-ctrl-btn si-teleport-btn" onClick={teleport}>✨</button>
             )}
           </div>
         </>
       )}
 
-      {state.phase === 'wave-clear' && (
+      {uiPhase === 'wave-clear' && (
         <div className="si-wave-clear">
           <span className="si-big-emoji">🎉</span>
-          <h3>{t('battle.waveClear', { wave: state.wave })}</h3>
-          <p>{t('battle.score')}: {state.score}</p>
+          <h3>{t('battle.waveClear', { wave: uiWave })}</h3>
+          <p>{t('battle.score')}: {uiScore}</p>
           <button className="si-start-btn" onClick={nextWave}>
             {t('battle.nextWave')} →
           </button>
@@ -584,12 +583,12 @@ export default function SpaceInvaders() {
         </div>
       )}
 
-      {state.phase === 'game-over' && (
+      {uiPhase === 'game-over' && (
         <div className="si-game-over">
           <span className="si-big-emoji">💥</span>
           <h3>{t('battle.gameOver')}</h3>
-          <p>{t('battle.finalScore', { score: state.score, wave: state.wave })}</p>
-          {state.wave > 1 && (
+          <p>{t('battle.finalScore', { score: uiScore, wave: uiWave })}</p>
+          {uiWave > 1 && (
             <button className="si-collect-btn" onClick={collectRewards}>
               🎁 {t('battle.collectRewards')}
             </button>
