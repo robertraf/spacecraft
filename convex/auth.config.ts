@@ -1,9 +1,9 @@
 /**
- * @fileoverview Configuración de OAuth para Convex Auth.
+ * @fileoverview OAuth configuration for Convex Auth.
  *
- * Define el dominio de la aplicación usado para verificación de tokens
- * y configuración de proveedores de autenticación. El dominio se obtiene
- * de la variable de entorno `CONVEX_SITE_URL` del deployment de Convex.
+ * Defines the application domain used for token verification
+ * and authentication provider configuration. The domain is obtained
+ * from the `CONVEX_SITE_URL` environment variable in the Convex deployment.
  *
  * @module auth.config
  */

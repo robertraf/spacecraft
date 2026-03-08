@@ -1,8 +1,8 @@
 /**
- * @fileoverview Punto de entrada de la aplicación SpaceCraft.
+ * @fileoverview Entry point for the SpaceCraft application.
  *
- * Inicializa el cliente de Convex, envuelve la app con los proveedores
- * de autenticación y renderiza el componente raíz en el DOM.
+ * Initializes the Convex client and i18n, wraps the app with
+ * authentication providers, and renders the root component to the DOM.
  *
  * @module main
  */
@@ -11,6 +11,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ConvexReactClient } from 'convex/react'
 import { ConvexAuthProvider } from '@convex-dev/auth/react'
+import './i18n'
 import './index.css'
 import App from './App'
 

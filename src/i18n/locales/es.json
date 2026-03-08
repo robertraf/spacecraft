@@ -1,0 +1,114 @@
+{
+  "app": {
+    "title": "SpaceCraft",
+    "subtitle": "Explora. Mina. Craftea.",
+    "loading": "Cargando SpaceCraft..."
+  },
+  "tabs": {
+    "planet": "Planeta",
+    "map": "Mapa",
+    "inventory": "Inventario",
+    "craft": "Crafteo"
+  },
+  "planet": {
+    "mine": "Minar",
+    "drill": "Taladrar",
+    "quantumDrill": "Perforar",
+    "mining": "Minando...",
+    "drilling": "Taladrando...",
+    "boring": "Perforando...",
+    "danger": "Peligro: {{level}}/5",
+    "availableResources": "Recursos disponibles:"
+  },
+  "starMap": {
+    "title": "Mapa Estelar",
+    "here": "AQUÍ",
+    "traveling": "Viajando..."
+  },
+  "inventory": {
+    "title": "Inventario ({{count}}/{{max}})",
+    "equipped": "Equipado:",
+    "equip": "Equipar",
+    "empty": "Tu inventario está vacío. ¡Ve a minar!"
+  },
+  "crafting": {
+    "title": "Mesa de Crafteo",
+    "craft": "Craftear",
+    "missingMaterials": "Faltan materiales"
+  },
+  "auth": {
+    "saveProgress": "Guardar progreso",
+    "signIn": "Iniciar sesión",
+    "signUpDesc": "Crea una cuenta para guardar tu progreso en todos tus dispositivos.",
+    "signInDesc": "Inicia sesión para restaurar tu progreso guardado.",
+    "linkedAccount": "Cuenta vinculada",
+    "autoSave": "Tu progreso se guarda automáticamente en <1>{{email}}</1>",
+    "signOut": "Cerrar sesión",
+    "emailPlaceholder": "tu@email.com",
+    "passwordPlaceholder": "Contraseña (mín. 8 caracteres)",
+    "confirmPasswordPlaceholder": "Confirmar contraseña",
+    "passwordMismatch": "Las contraseñas no coinciden.",
+    "signUpError": "No se pudo crear la cuenta. Intenta con otro email.",
+    "signInError": "Email o contraseña incorrectos.",
+    "signOutError": "Ocurrió un problema al cerrar sesión. Inténtalo de nuevo.",
+    "creatingAccount": "Creando cuenta...",
+    "signingIn": "Entrando...",
+    "createAccount": "Crear cuenta",
+    "haveAccount": "¿Ya tienes cuenta? Inicia sesión",
+    "noAccount": "¿Sin cuenta? Regístrate",
+    "accountTooltip": "Cuenta: {{email}}",
+    "linkTooltip": "Vincular cuenta para guardar progreso"
+  },
+  "log": {
+    "welcome": "¡Bienvenido al espacio, explorador! Estás en Terra Nova.",
+    "welcomeBack": "¡Bienvenido de vuelta! Tu progreso ha sido restaurado.",
+    "inventoryFull": "¡Inventario lleno! Craftea o descarta items.",
+    "inventoryFullShort": "¡Inventario lleno!",
+    "nothingFound": "¡No encontraste nada esta vez!",
+    "notEnoughMaterials": "No tienes suficientes materiales.",
+    "mined": "Minaste {{amount}}x {{emoji}} {{name}}",
+    "crafted": "Crafteaste {{amount}}x {{emoji}} {{name}}!",
+    "arrived": "Llegaste a {{emoji}} {{name}}",
+    "equipped": "Equipaste {{emoji}} {{name}}",
+    "discarded": "Descartaste {{amount}}x {{name}}",
+    "nothing": "¡Nada!"
+  },
+  "items": {
+    "iron-ore": { "name": "Mineral de Hierro" },
+    "stone": { "name": "Piedra" },
+    "copper-ore": { "name": "Mineral de Cobre" },
+    "coal": { "name": "Carbón" },
+    "obsidian": { "name": "Obsidiana" },
+    "diamond": { "name": "Diamante" },
+    "sulfur": { "name": "Azufre" },
+    "ice-crystal": { "name": "Cristal de Hielo" },
+    "titanium-ore": { "name": "Mineral de Titanio" },
+    "frozen-gas": { "name": "Gas Congelado" },
+    "bio-fiber": { "name": "Fibra Biológica" },
+    "alien-wood": { "name": "Madera Alien" },
+    "nectar": { "name": "Néctar Espacial" },
+    "circuit-board": { "name": "Placa de Circuito" },
+    "nano-tube": { "name": "Nanotubo" },
+    "plasma-cell": { "name": "Celda de Plasma" },
+    "iron-bar": { "name": "Barra de Hierro" },
+    "copper-wire": { "name": "Cable de Cobre" },
+    "steel-plate": { "name": "Placa de Acero" },
+    "titanium-bar": { "name": "Barra de Titanio" },
+    "energy-cell": { "name": "Celda de Energía" },
+    "bio-gel": { "name": "Bio-Gel" },
+    "space-pickaxe": { "name": "Pico Espacial", "effect": "Duplica recursos al minar" },
+    "scanner": { "name": "Escáner", "effect": "Revela items raros" },
+    "jetpack": { "name": "Jetpack", "effect": "Viaja más rápido entre planetas" },
+    "shield-gen": { "name": "Generador de Escudo", "effect": "Protege en planetas peligrosos" },
+    "electric-pickaxe": { "name": "Pico Eléctrico", "effect": "Mina rápido con efecto de taladro eléctrico" },
+    "quantum-drill": { "name": "Taladro Cuántico", "effect": "Triplica recursos y encuentra items secretos" },
+    "warp-drive": { "name": "Motor Warp", "effect": "Viaje instantáneo entre planetas" }
+  },
+  "planets": {
+    "terra-nova": { "name": "Terra Nova", "description": "Un planeta rocoso rico en minerales básicos." },
+    "volcanus": { "name": "Volcanus", "description": "Mundo volcánico con minerales raros en sus cavernas." },
+    "glacius": { "name": "Glacius", "description": "Planeta helado con cristales energéticos bajo el hielo." },
+    "verdantis": { "name": "Verdantis", "description": "Selva alienígena llena de materiales orgánicos." },
+    "nebulon": { "name": "Nebulón", "description": "Estación espacial abandonada con tecnología antigua." }
+  }
+}

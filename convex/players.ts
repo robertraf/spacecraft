@@ -1,10 +1,10 @@
 /**
- * @fileoverview Queries y mutations de jugadores para el backend de Convex.
+ * @fileoverview Player queries and mutations for the Convex backend.
  *
- * Provee las operaciones de lectura y escritura del estado de juego:
- * - {@link getMe}: Obtiene info del usuario autenticado.
- * - {@link getMyPlayer}: Obtiene el estado de juego guardado del jugador.
- * - {@link saveGameState}: Persiste el estado de juego actual (upsert).
+ * Provides read and write operations for the game state:
+ * - {@link getMe}: Gets info about the authenticated user.
+ * - {@link getMyPlayer}: Gets the player's saved game state.
+ * - {@link saveGameState}: Persists the current game state (upsert).
  *
  * @module players
  */
@@ -14,10 +14,10 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 
 /**
- * Obtiene la información básica del usuario autenticado.
+ * Gets basic information about the authenticated user.
  *
  * @returns {{ userId: string, email: string | null } | null}
- *   Objeto con el ID y email del usuario, o `null` si no está autenticado.
+ *   Object with the user ID and email, or `null` if not authenticated.
  */
 export const getMe = query({
   args: {},
@@ -30,13 +30,13 @@ export const getMe = query({
 });
 
 /**
- * Obtiene el estado de juego guardado del jugador autenticado.
+ * Gets the saved game state for the authenticated player.
  *
- * Busca en la tabla `players` usando el índice `by_user` para encontrar
- * el registro único asociado al usuario.
+ * Looks up the `players` table using the `by_user` index to find
+ * the unique record associated with the user.
  *
- * @returns {Object | null} Documento completo del jugador o `null`
- *   si no existe (jugador nuevo) o no está autenticado.
+ * @returns {Object | null} Full player document or `null`
+ *   if it doesn't exist (new player) or user is not authenticated.
  */
 export const getMyPlayer = query({
   args: {},
@@ -51,11 +51,11 @@ export const getMyPlayer = query({
 });
 
 /**
- * Persiste el estado de juego del jugador autenticado.
+ * Persists the game state for the authenticated player.
  *
- * Implementa un patrón upsert: si el jugador ya tiene un registro,
- * lo actualiza con `patch`; si es nuevo, inserta un registro completo.
- * No hace nada si el usuario no está autenticado.
+ * Implements an upsert pattern: if the player already has a record,
+ * it updates with `patch`; if new, inserts a full record.
+ * Does nothing if the user is not authenticated.
  */
 export const saveGameState = mutation({
   args: {

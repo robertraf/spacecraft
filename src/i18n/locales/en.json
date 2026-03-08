@@ -1,0 +1,114 @@
+{
+  "app": {
+    "title": "SpaceCraft",
+    "subtitle": "Explore. Mine. Craft.",
+    "loading": "Loading SpaceCraft..."
+  },
+  "tabs": {
+    "planet": "Planet",
+    "map": "Map",
+    "inventory": "Inventory",
+    "craft": "Crafting"
+  },
+  "planet": {
+    "mine": "Mine",
+    "drill": "Drill",
+    "quantumDrill": "Bore",
+    "mining": "Mining...",
+    "drilling": "Drilling...",
+    "boring": "Boring...",
+    "danger": "Danger: {{level}}/5",
+    "availableResources": "Available resources:"
+  },
+  "starMap": {
+    "title": "Star Map",
+    "here": "HERE",
+    "traveling": "Traveling..."
+  },
+  "inventory": {
+    "title": "Inventory ({{count}}/{{max}})",
+    "equipped": "Equipped:",
+    "equip": "Equip",
+    "empty": "Your inventory is empty. Go mine!"
+  },
+  "crafting": {
+    "title": "Crafting Table",
+    "craft": "Craft",
+    "missingMaterials": "Missing materials"
+  },
+  "auth": {
+    "saveProgress": "Save progress",
+    "signIn": "Sign in",
+    "signUpDesc": "Create an account to save your progress across all your devices.",
+    "signInDesc": "Sign in to restore your saved progress.",
+    "linkedAccount": "Linked account",
+    "autoSave": "Your progress is automatically saved to <1>{{email}}</1>",
+    "signOut": "Sign out",
+    "emailPlaceholder": "you@email.com",
+    "passwordPlaceholder": "Password (min. 8 characters)",
+    "confirmPasswordPlaceholder": "Confirm password",
+    "passwordMismatch": "Passwords do not match.",
+    "signUpError": "Could not create account. Try a different email.",
+    "signInError": "Incorrect email or password.",
+    "signOutError": "There was a problem signing out. Please try again.",
+    "creatingAccount": "Creating account...",
+    "signingIn": "Signing in...",
+    "createAccount": "Create account",
+    "haveAccount": "Already have an account? Sign in",
+    "noAccount": "No account? Sign up",
+    "accountTooltip": "Account: {{email}}",
+    "linkTooltip": "Link account to save progress"
+  },
+  "log": {
+    "welcome": "Welcome to space, explorer! You are on Terra Nova.",
+    "welcomeBack": "Welcome back! Your progress has been restored.",
+    "inventoryFull": "Inventory full! Craft or discard items.",
+    "inventoryFullShort": "Inventory full!",
+    "nothingFound": "You didn't find anything this time!",
+    "notEnoughMaterials": "Not enough materials.",
+    "mined": "Mined {{amount}}x {{emoji}} {{name}}",
+    "crafted": "Crafted {{amount}}x {{emoji}} {{name}}!",
+    "arrived": "Arrived at {{emoji}} {{name}}",
+    "equipped": "Equipped {{emoji}} {{name}}",
+    "discarded": "Discarded {{amount}}x {{name}}",
+    "nothing": "Nothing!"
+  },
+  "items": {
+    "iron-ore": { "name": "Iron Ore" },
+    "stone": { "name": "Stone" },
+    "copper-ore": { "name": "Copper Ore" },
+    "coal": { "name": "Coal" },
+    "obsidian": { "name": "Obsidian" },
+    "diamond": { "name": "Diamond" },
+    "sulfur": { "name": "Sulfur" },
+    "ice-crystal": { "name": "Ice Crystal" },
+    "titanium-ore": { "name": "Titanium Ore" },
+    "frozen-gas": { "name": "Frozen Gas" },
+    "bio-fiber": { "name": "Bio Fiber" },
+    "alien-wood": { "name": "Alien Wood" },
+    "nectar": { "name": "Space Nectar" },
+    "circuit-board": { "name": "Circuit Board" },
+    "nano-tube": { "name": "Nanotube" },
+    "plasma-cell": { "name": "Plasma Cell" },
+    "iron-bar": { "name": "Iron Bar" },
+    "copper-wire": { "name": "Copper Wire" },
+    "steel-plate": { "name": "Steel Plate" },
+    "titanium-bar": { "name": "Titanium Bar" },
+    "energy-cell": { "name": "Energy Cell" },
+    "bio-gel": { "name": "Bio-Gel" },
+    "space-pickaxe": { "name": "Space Pickaxe", "effect": "Doubles resources when mining" },
+    "scanner": { "name": "Scanner", "effect": "Reveals rare items" },
+    "jetpack": { "name": "Jetpack", "effect": "Travel faster between planets" },
+    "shield-gen": { "name": "Shield Generator", "effect": "Protects on dangerous planets" },
+    "electric-pickaxe": { "name": "Electric Pickaxe", "effect": "Mines fast with electric drill effect" },
+    "quantum-drill": { "name": "Quantum Drill", "effect": "Triples resources and finds secret items" },
+    "warp-drive": { "name": "Warp Drive", "effect": "Instant travel between planets" }
+  },
+  "planets": {
+    "terra-nova": { "name": "Terra Nova", "description": "A rocky planet rich in basic minerals." },
+    "volcanus": { "name": "Volcanus", "description": "Volcanic world with rare minerals in its caverns." },
+    "glacius": { "name": "Glacius", "description": "Frozen planet with energy crystals under the ice." },
+    "verdantis": { "name": "Verdantis", "description": "Alien jungle full of organic materials." },
+    "nebulon": { "name": "Nebulon", "description": "Abandoned space station with ancient technology." }
+  }
+}

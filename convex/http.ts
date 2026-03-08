@@ -1,8 +1,8 @@
 /**
- * @fileoverview Rutas HTTP del backend de Convex.
+ * @fileoverview HTTP routes for the Convex backend.
  *
- * Registra las rutas HTTP necesarias para el flujo de autenticación
- * de Convex Auth (sign-up, sign-in, sign-out, verificación de tokens).
+ * Registers the HTTP routes needed for the Convex Auth authentication
+ * flow (sign-up, sign-in, sign-out, token verification).
  *
  * @module http
  */

@@ -1,9 +1,9 @@
 /**
- * @fileoverview Esquema de base de datos de Convex para SpaceCraft.
+ * @fileoverview Convex database schema for SpaceCraft.
  *
- * Define la tabla `players` que almacena el estado de juego persistente
- * de cada jugador, incluyendo inventario, equipo, planetas descubiertos
- * y estadísticas. También incluye las tablas de autenticación de Convex Auth.
+ * Defines the `players` table that stores each player's persistent game
+ * state, including inventory, equipment, discovered planets, and
+ * statistics. Also includes Convex Auth authentication tables.
  *
  * @module schema
  */
@@ -16,23 +16,23 @@ export default defineSchema({
   ...authTables,
 
   /**
-   * Tabla de jugadores con su estado de juego persistente.
-   * Indexada por `userId` para búsquedas eficientes del jugador autenticado.
+   * Players table with persistent game state.
+   * Indexed by `userId` for efficient lookups of the authenticated player.
    */
   players: defineTable({
-    /** ID del usuario autenticado (referencia a la tabla `users`). */
+    /** Authenticated user ID (reference to the `users` table). */
     userId: v.id("users"),
-    /** ID del planeta donde se encuentra el jugador actualmente. */
+    /** ID of the planet where the player is currently located. */
     currentPlanetId: v.string(),
-    /** IDs de planetas que el jugador ha visitado. */
+    /** IDs of planets the player has visited. */
     discoveredPlanets: v.array(v.string()),
-    /** Mapa de itemId a cantidad en inventario. */
+    /** Map of itemId to quantity in inventory. */
     inventory: v.record(v.string(), v.number()),
-    /** IDs de ítems equipados actualmente. */
+    /** IDs of currently equipped items. */
     equipment: v.array(v.string()),
-    /** IDs de ítems que el jugador ha crafteado al menos una vez. */
+    /** IDs of items the player has crafted at least once. */
     craftedItems: v.array(v.string()),
-    /** Estadísticas acumuladas del jugador. */
+    /** Accumulated player statistics. */
     stats: v.object({
       itemsMined: v.number(),
       itemsCrafted: v.number(),

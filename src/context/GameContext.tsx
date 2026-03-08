@@ -1,10 +1,9 @@
 /**
- * @fileoverview Contexto global del juego SpaceCraft.
+ * @fileoverview Global game context for SpaceCraft.
  *
- * Implementa el patrón React Context + useReducer para manejar todo el estado
- * del juego: inventario, planeta actual, equipamiento, crafteo, viaje y minería.
- * Sincroniza automáticamente el estado con el backend de Convex después de
- * acciones significativas.
+ * Implements the React Context + useReducer pattern to manage all game state:
+ * inventory, current planet, equipment, crafting, travel, and mining.
+ * Automatically syncs state with the Convex backend after significant actions.
  *
  * @module GameContext
  */
@@ -29,8 +28,9 @@ import {
   type Recipe,
 } from '../data/gameData';
 
-interface LogEntry {
-  text: string;
+export interface LogEntry {
+  key: string;
+  params?: Record<string, string | number>;
   type: string;
 }
 
@@ -75,7 +75,7 @@ const initialState: GameState = {
   isTraveling: false,
   isMining: false,
   travelTarget: null,
-  log: [{ text: '¡Bienvenido al espacio, explorador! Estás en Terra Nova.', type: 'info' }],
+  log: [{ key: 'log.welcome', type: 'info' }],
   stats: { itemsMined: 0, itemsCrafted: 0, planetsVisited: 1 },
 };
 
@@ -106,8 +106,8 @@ function removeFromInventory(
   return next;
 }
 
-function appendLog(log: LogEntry[], text: string, type: string): LogEntry[] {
-  return [{ text, type }, ...log].slice(0, MAX_LOG_ENTRIES);
+function appendLog(log: LogEntry[], key: string, type: string, params?: Record<string, string | number>): LogEntry[] {
+  return [{ key, params, type }, ...log].slice(0, MAX_LOG_ENTRIES);
 }
 
 // ---------------------------------------------------------------------------
@@ -134,7 +134,7 @@ type GameAction =
   | { type: 'CRAFT'; payload: Recipe }
   | { type: 'EQUIP'; payload: string }
   | { type: 'DISCARD'; payload: { itemId: string; amount: number } }
-  | { type: 'ADD_LOG'; payload: { text: string; type: string } };
+  | { type: 'ADD_LOG'; payload: { key: string; type: string; params?: Record<string, string | number> } };
 
 function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
@@ -158,7 +158,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         equipment: safeEquipment,
         craftedItems: safeCraftedItems,
         stats,
-        log: [{ text: '¡Bienvenido de vuelta! Tu progreso ha sido restaurado.', type: 'info' }],
+        log: [{ key: 'log.welcomeBack', type: 'info' }],
       };
     }
 
@@ -172,7 +172,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return {
           ...state,
           isMining: false,
-          log: appendLog(state.log, '¡Inventario lleno! Craftea o descarta items.', 'warning'),
+          log: appendLog(state.log, 'log.inventoryFull', 'warning'),
         };
       }
       const item = ITEMS[itemId];
@@ -181,7 +181,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         isMining: false,
         inventory: newInv,
         stats: { ...state.stats, itemsMined: state.stats.itemsMined + amount },
-        log: appendLog(state.log, `Minaste ${amount}x ${item.emoji} ${item.name}`, 'success'),
+        log: appendLog(state.log, 'log.mined', 'success', { amount, emoji: item.emoji, itemId }),
       };
     }
 
@@ -189,7 +189,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         isMining: false,
-        log: appendLog(state.log, '¡No encontraste nada esta vez!', 'warning'),
+        log: appendLog(state.log, 'log.nothingFound', 'warning'),
       };
 
     case 'TRAVEL_START':
@@ -207,7 +207,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         currentPlanet: planet,
         discoveredPlanets: discovered,
         stats: { ...state.stats, planetsVisited: discovered.length },
-        log: appendLog(state.log, `Llegaste a ${planet.emoji} ${planet.name}`, 'info'),
+        log: appendLog(state.log, 'log.arrived', 'info', { emoji: planet.emoji, planetId: planet.id }),
       };
     }
 
@@ -219,7 +219,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         if (!inv) {
           return {
             ...state,
-            log: appendLog(state.log, 'No tienes suficientes materiales.', 'error'),
+            log: appendLog(state.log, 'log.notEnoughMaterials', 'error'),
           };
         }
       }
@@ -227,7 +227,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (!inv) {
         return {
           ...state,
-          log: appendLog(state.log, '¡Inventario lleno!', 'warning'),
+          log: appendLog(state.log, 'log.inventoryFullShort', 'warning'),
         };
       }
       const outputItem = ITEMS[recipe.output];
@@ -236,7 +236,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         inventory: inv,
         craftedItems: [...new Set([...state.craftedItems, recipe.output])],
         stats: { ...state.stats, itemsCrafted: state.stats.itemsCrafted + 1 },
-        log: appendLog(state.log, `Crafteaste ${recipe.amount}x ${outputItem.emoji} ${outputItem.name}!`, 'success'),
+        log: appendLog(state.log, 'log.crafted', 'success', { amount: recipe.amount, emoji: outputItem.emoji, itemId: recipe.output }),
       };
     }
 
@@ -248,7 +248,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         inventory: inv,
         equipment: [...state.equipment, itemId],
-        log: appendLog(state.log, `Equipaste ${ITEMS[itemId].emoji} ${ITEMS[itemId].name}`, 'info'),
+        log: appendLog(state.log, 'log.equipped', 'info', { emoji: ITEMS[itemId].emoji, itemId }),
       };
     }
 
@@ -259,14 +259,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         inventory: inv,
-        log: appendLog(state.log, `Descartaste ${amount}x ${ITEMS[itemId].name}`, 'warning'),
+        log: appendLog(state.log, 'log.discarded', 'warning', { amount, itemId }),
       };
     }
 
     case 'ADD_LOG':
       return {
         ...state,
-        log: appendLog(state.log, action.payload.text, action.payload.type),
+        log: appendLog(state.log, action.payload.key, action.payload.type, action.payload.params),
       };
 
     default:
@@ -288,7 +288,7 @@ function calculateMineAmount({ hasDrill, hasElectricPickaxe, hasPickaxe }: MineF
 }
 
 /**
- * Proveedor del contexto global del juego.
+ * Global game context provider.
  */
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
@@ -431,10 +431,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Hook para acceder al contexto del juego.
- * Debe usarse dentro de un componente envuelto por {@link GameProvider}.
+ * Hook to access the game context.
+ * Must be used within a component wrapped by {@link GameProvider}.
  *
- * @throws {Error} Si se usa fuera de GameProvider.
+ * @throws {Error} If used outside of GameProvider.
  */
 export function useGame(): GameContextValue {
   const ctx = useContext(GameContext);
