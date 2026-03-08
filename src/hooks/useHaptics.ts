@@ -56,5 +56,13 @@ export function useHaptics() {
     error: () => trigger('error'),
     drill,
     stopDrill,
+    shoot: () => {
+      trigger('light');
+      if (navigator.vibrate) navigator.vibrate(15);
+    },
+    explosion: () => {
+      trigger('error');
+      if (navigator.vibrate) navigator.vibrate([50, 30, 80]);
+    },
   };
 }
