@@ -1,3 +1,12 @@
+/**
+ * @fileoverview Punto de entrada de la aplicación SpaceCraft.
+ *
+ * Inicializa el cliente de Convex, envuelve la app con los proveedores
+ * de autenticación y renderiza el componente raíz en el DOM.
+ *
+ * @module main
+ */
+
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ConvexReactClient } from 'convex/react'
@@ -11,6 +20,8 @@ if (!convexUrl) {
     'VITE_CONVEX_URL is not set. Define it in .env.local before starting the app.',
   )
 }
+
+/** Cliente de Convex configurado con la URL del deployment. */
 const convex = new ConvexReactClient(convexUrl)
 
 createRoot(document.getElementById('root')).render(

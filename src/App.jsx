@@ -1,3 +1,12 @@
+/**
+ * @fileoverview Componente raíz de la aplicación SpaceCraft.
+ *
+ * Maneja la autenticación automática anónima con Convex Auth,
+ * la navegación por tabs y la estructura general del layout del juego.
+ *
+ * @module App
+ */
+
 import { useState, useEffect, useRef } from 'react';
 import { useConvexAuth } from 'convex/react';
 import { useAuthActions } from '@convex-dev/auth/react';
@@ -10,6 +19,10 @@ import GameLog from './components/GameLog';
 import AuthUpgrade from './components/AuthUpgrade';
 import './App.css';
 
+/**
+ * Configuración de las tabs de navegación del juego.
+ * @type {Array<{id: string, label: string, component: import('react').ComponentType}>}
+ */
 const TABS = [
   { id: 'planet', label: '🌍 Planeta', component: PlanetView },
   { id: 'map', label: '🗺️ Mapa', component: StarMap },
@@ -17,6 +30,15 @@ const TABS = [
   { id: 'craft', label: '🔧 Crafteo', component: CraftingTable },
 ];
 
+/**
+ * Interfaz principal del juego con navegación por tabs.
+ *
+ * Renderiza el header con título y botón de autenticación,
+ * el componente activo según la tab seleccionada, el log de eventos
+ * y la barra de navegación inferior.
+ *
+ * @returns {import('react').JSX.Element}
+ */
 function GameUI() {
   const [activeTab, setActiveTab] = useState('planet');
   const ActiveComponent = TABS.find(t => t.id === activeTab).component;
@@ -54,6 +76,10 @@ function GameUI() {
   );
 }
 
+/**
+ * Pantalla de carga mostrada mientras se inicializa la autenticación.
+ * @returns {import('react').JSX.Element}
+ */
 function LoadingScreen() {
   return (
     <div className="loading-screen">
@@ -63,11 +89,19 @@ function LoadingScreen() {
   );
 }
 
+/**
+ * Componente raíz de la aplicación.
+ *
+ * Gestiona el flujo de autenticación automática: si el usuario no está
+ * autenticado, inicia sesión anónima automáticamente. Una vez autenticado,
+ * renderiza el {@link GameProvider} con la UI del juego.
+ *
+ * @returns {import('react').JSX.Element}
+ */
 export default function App() {
   const { isLoading, isAuthenticated } = useConvexAuth();
   const { signIn } = useAuthActions();
 
-  // Auto sign in anonymously on first visit only
   const didInitAuth = useRef(false);
   useEffect(() => {
     if (isLoading || didInitAuth.current) return;

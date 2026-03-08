@@ -20,6 +20,8 @@ SpaceCraft follows a simple but deep loop:
 - **Procedural mining sounds** with Web Audio API
 - **Star map** with fog-of-war — planets are revealed as you discover them
 - **Game log** tracking every action in real time
+- **Persistent game state** — progress syncs automatically with the Convex backend
+- **Account system** — anonymous play by default, optional email/password account to save progress across devices
 
 ## Planets
 
@@ -58,11 +60,46 @@ Raw Resources → Basic Materials → Intermediate Materials → Tools & Equipme
 
 ## Tech Stack
 
-- **React 19** — UI and game state
-- **Vite** — dev server and bundler
-- **Web Haptics API** — vibration feedback on mobile devices
-- **Web Audio API** — procedural mining and crafting sounds
-- **CSS animations** — particle effects, electric sparks, planet strike animations
+| Technology | Purpose |
+|------------|---------|
+| **React 19** | UI framework with hooks-based state management |
+| **Vite** | Dev server and production bundler |
+| **Convex** | Serverless backend (database + real-time sync) |
+| **Convex Auth** | Authentication (Anonymous + Password providers) |
+| **Web Haptics API** | Vibration feedback on mobile devices |
+| **Web Audio API** | Procedural mining and crafting sounds |
+| **CSS animations** | Particle effects, electric sparks, planet strike animations |
+| **Cloudflare Pages** | Production deployment via GitHub Actions |
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Frontend (React 19 + Vite)                             │
+├─────────────────────────────────────────────────────────┤
+│  App.jsx ─── GameProvider (GameContext.jsx)              │
+│              ├── PlanetView   (mining + animations)     │
+│              ├── StarMap      (planet navigation)       │
+│              ├── Inventory    (items + equipment)       │
+│              ├── CraftingTable (recipes)                │
+│              └── GameLog      (events + stats)          │
+│              AuthUpgrade      (account linking)         │
+├─────────────────────────────────────────────────────────┤
+│  Hooks:                                                 │
+│  ├── useGame()     — Access global game state           │
+│  ├── useHaptics()  — Vibration patterns                 │
+│  └── useSound()    — Audio synthesis                    │
+├─────────────────────────────────────────────────────────┤
+│  Backend (Convex Serverless)                            │
+├─────────────────────────────────────────────────────────┤
+│  Queries:   getMe, getMyPlayer                          │
+│  Mutations: saveGameState                               │
+│  Database:  players table + auth tables                 │
+│  Auth:      Anonymous + Password providers              │
+├─────────────────────────────────────────────────────────┤
+│  Deployment: Cloudflare Pages (GitHub Actions CI/CD)    │
+└─────────────────────────────────────────────────────────┘
+```
 
 ## Project Structure
 
@@ -73,15 +110,36 @@ src/
 │   ├── StarMap.jsx        # Planet navigation with fog-of-war
 │   ├── Inventory.jsx      # Item grid and equipment slots
 │   ├── CraftingTable.jsx  # Recipe browser and crafting actions
-│   └── GameLog.jsx        # Live event feed
+│   ├── GameLog.jsx        # Live event feed and stats bar
+│   └── AuthUpgrade.jsx    # Account linking and sign-in/sign-up modal
 ├── context/
-│   └── GameContext.jsx    # Global game state (inventory, planet, travel)
+│   └── GameContext.jsx    # Global game state (reducer + Convex sync)
 ├── hooks/
 │   ├── useHaptics.js      # Haptic patterns (mine, drill, craft, travel)
 │   └── useSound.js        # Audio synthesis for game events
-└── data/
-    └── gameData.js        # Planets, items, recipes, and constants
+├── data/
+│   └── gameData.js        # Planets, items, recipes, and game constants
+├── App.jsx                # Root component with tab navigation & auth
+├── main.jsx               # Entry point with Convex provider setup
+├── App.css                # All component styles and animations
+└── index.css              # Global styles and CSS variables
+
+convex/
+├── schema.ts              # Database schema (players table)
+├── players.ts             # Queries and mutations for game state
+├── auth.ts                # Convex Auth configuration (Anonymous + Password)
+├── auth.config.ts         # OAuth domain configuration
+└── http.ts                # HTTP routes for auth endpoints
 ```
+
+## Documentation
+
+All source code is documented with **JSDoc** (frontend JavaScript/JSX) and **TSDoc** (backend TypeScript). Each module includes:
+
+- `@fileoverview` with module purpose description
+- `@typedef` for data structures (Planet, Item, Recipe, GameState, etc.)
+- `@param` / `@returns` for all public functions and hooks
+- Inline comments for complex logic (mining calculations, audio synthesis, etc.)
 
 ## Getting Started
 
@@ -90,6 +148,9 @@ src/
 ```bash
 # Install dependencies
 npm install
+
+# Set up Convex (required for backend)
+npx convex dev
 
 # Start development server
 npm run dev
@@ -100,10 +161,29 @@ npm run build
 
 Then open [http://localhost:5173](http://localhost:5173) in your browser.
 
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `VITE_CONVEX_URL` | Convex deployment URL | Yes |
+| `CONVEX_SITE_URL` | Convex site URL (for auth) | Yes (backend) |
+
 ## Deployment
 
-The project includes a `wrangler.toml` for deploying to **Cloudflare Pages**:
+The project deploys automatically to **Cloudflare Pages** via GitHub Actions on push to `master`.
+
+### Manual deployment:
 
 ```bash
+npm run build
 npx wrangler pages deploy dist
 ```
+
+### CI/CD Pipeline
+
+The GitHub Actions workflow (`.github/workflows/deploy.yml`) handles:
+1. Install dependencies with `npm ci`
+2. Build with Vite (injects `VITE_CONVEX_URL` from GitHub Secrets)
+3. Deploy to Cloudflare Pages
+
+**Required GitHub Secrets:** `VITE_CONVEX_URL`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
