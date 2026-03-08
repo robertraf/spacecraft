@@ -1,9 +1,9 @@
 /**
- * @fileoverview Configuración de autenticación de Convex Auth.
+ * @fileoverview Convex Auth authentication configuration.
  *
- * Configura dos proveedores de autenticación:
- * - **Anonymous**: Permite jugar sin registro (sesión temporal).
- * - **Password**: Permite crear cuenta con email/password para persistir progreso.
+ * Configures two authentication providers:
+ * - **Anonymous**: Allows playing without registration (temporary session).
+ * - **Password**: Allows creating an account with email/password to persist progress.
  *
  * @module auth
  */

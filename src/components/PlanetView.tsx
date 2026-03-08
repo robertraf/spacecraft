@@ -1,14 +1,15 @@
 /**
- * @fileoverview Componente de vista de planeta y minería.
+ * @fileoverview Planet view and mining component.
  *
- * Muestra el planeta actual con animaciones de minería, partículas de roca,
- * efectos eléctricos para herramientas avanzadas y popups de resultado.
- * Integra feedback háptico y sonido procedural.
+ * Displays the current planet with mining animations, rock particles,
+ * electric effects for advanced tools, and result popups.
+ * Integrates haptic feedback and procedural sound.
  *
  * @module PlanetView
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ITEMS } from '../data/gameData';
 import { useGame } from '../context/GameContext';
 import { useHaptics } from '../hooks/useHaptics';
@@ -27,6 +28,7 @@ interface MineResult {
 
 export default function PlanetView() {
   const { currentPlanet, isMining, isTraveling, mine, equipment, log } = useGame();
+  const { t } = useTranslation();
   const haptics = useHaptics();
   const sound = useSound();
 
@@ -41,20 +43,24 @@ export default function PlanetView() {
   useEffect(() => {
     if (prevLogRef.current !== log && log.length > 0) {
       const latest = log[0];
-      if (latest.type === 'success' && latest.text.startsWith('Minaste')) {
-        setMineResult({ text: latest.text, type: 'success' });
+      if (latest.type === 'success' && latest.key === 'log.mined') {
+        const params = latest.params!;
+        setMineResult({
+          text: t('log.mined', { amount: params.amount, emoji: params.emoji, name: t(`items.${params.itemId}.name`) }),
+          type: 'success',
+        });
         sound.mineSuccess();
         haptics.mineSuccess();
         setTimeout(() => setMineResult(null), 1000);
-      } else if (latest.type === 'warning' && latest.text.includes('No encontraste')) {
-        setMineResult({ text: '¡Nada!', type: 'fail' });
+      } else if (latest.type === 'warning' && latest.key === 'log.nothingFound') {
+        setMineResult({ text: t('log.nothing'), type: 'fail' });
         sound.mineFail();
         haptics.mineFail();
         setTimeout(() => setMineResult(null), 1000);
       }
     }
     prevLogRef.current = log;
-  }, [log, sound, haptics]);
+  }, [log, sound, haptics, t]);
 
   useEffect(() => {
     if (!isMining) {
@@ -91,16 +97,16 @@ export default function PlanetView() {
   const isElectricMining = isMining && (hasElectricPickaxe || hasDrill);
 
   const mineButtonLabel = hasElectricPickaxe
-    ? '⚡ Taladrar'
+    ? `⚡ ${t('planet.drill')}`
     : hasDrill
-    ? '🌀 Perforar'
-    : '⛏️ Minar';
+    ? `🌀 ${t('planet.quantumDrill')}`
+    : `⛏️ ${t('planet.mine')}`;
 
   const miningLabel = hasElectricPickaxe
-    ? '⚡ Taladrando...'
+    ? `⚡ ${t('planet.drilling')}`
     : hasDrill
-    ? '🌀 Perforando...'
-    : '⛏️ Minando...';
+    ? `🌀 ${t('planet.boring')}`
+    : `⛏️ ${t('planet.mining')}`;
 
   return (
     <div className="planet-view">
@@ -136,11 +142,11 @@ export default function PlanetView() {
           </div>
         )}
 
-        <h2 className="planet-name">{currentPlanet.name}</h2>
-        <p className="planet-desc">{currentPlanet.description}</p>
+        <h2 className="planet-name">{t(`planets.${currentPlanet.id}.name`)}</h2>
+        <p className="planet-desc">{t(`planets.${currentPlanet.id}.description`)}</p>
         <div className="danger-level">
           {'⚠️'.repeat(currentPlanet.dangerLevel)}
-          <span> Peligro: {currentPlanet.dangerLevel}/5</span>
+          <span> {t('planet.danger', { level: currentPlanet.dangerLevel })}</span>
         </div>
       </div>
 
@@ -159,13 +165,13 @@ export default function PlanetView() {
       </button>
 
       <div className="planet-resources">
-        <h4>Recursos disponibles:</h4>
+        <h4>{t('planet.availableResources')}</h4>
         <div className="resource-tags">
           {currentPlanet.resources.map(r => {
             const item = ITEMS[r];
             return (
               <span key={r} className={`resource-tag rarity-${item.rarity}`}>
-                {item.emoji} {item.name}
+                {item.emoji} {t(`items.${r}.name`)}
               </span>
             );
           })}

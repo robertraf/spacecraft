@@ -1,13 +1,31 @@
 /**
- * @fileoverview Componente de log de eventos y estadísticas del juego.
+ * @fileoverview Game event log and statistics component.
  *
- * Muestra un feed en tiempo real de las acciones del jugador junto con
- * estadísticas resumidas de ítems minados, crafteados y planetas visitados.
+ * Displays a real-time feed of player actions along with
+ * summary statistics for items mined, crafted, and planets visited.
  *
  * @module GameLog
  */
 
+import { useTranslation } from 'react-i18next';
 import { useGame } from '../context/GameContext';
+import type { LogEntry } from '../context/GameContext';
+
+function LogMessage({ entry }: { entry: LogEntry }) {
+  const { t } = useTranslation();
+
+  const params = entry.params ?? {};
+  const resolvedParams: Record<string, string | number> = { ...params };
+
+  if ('itemId' in params) {
+    resolvedParams.name = t(`items.${params.itemId}.name`);
+  }
+  if ('planetId' in params) {
+    resolvedParams.name = t(`planets.${params.planetId}.name`);
+  }
+
+  return <>{t(entry.key, resolvedParams)}</>;
+}
 
 export default function GameLog() {
   const { log, stats } = useGame();
@@ -21,8 +39,8 @@ export default function GameLog() {
       </div>
       <div className="log-entries">
         {log.map((entry, i) => (
-          <div key={`${entry.type}-${entry.text}-${i}`} className={`log-entry log-${entry.type}`}>
-            {entry.text}
+          <div key={`${entry.type}-${entry.key}-${i}`} className={`log-entry log-${entry.type}`}>
+            <LogMessage entry={entry} />
           </div>
         ))}
       </div>

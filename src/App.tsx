@@ -1,13 +1,14 @@
 /**
- * @fileoverview Componente raíz de la aplicación SpaceCraft.
+ * @fileoverview Root component of the SpaceCraft application.
  *
- * Maneja la autenticación automática anónima con Convex Auth,
- * la navegación por tabs y la estructura general del layout del juego.
+ * Handles automatic anonymous authentication with Convex Auth,
+ * tab navigation, and the overall game layout structure.
  *
  * @module App
  */
 
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useConvexAuth } from 'convex/react';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { GameProvider } from './context/GameContext';
@@ -21,18 +22,20 @@ import './App.css';
 
 interface Tab {
   id: string;
-  label: string;
+  labelKey: string;
+  emoji: string;
   component: React.ComponentType;
 }
 
 const TABS: Tab[] = [
-  { id: 'planet', label: '🌍 Planeta', component: PlanetView },
-  { id: 'map', label: '🗺️ Mapa', component: StarMap },
-  { id: 'inventory', label: '🎒 Inventario', component: Inventory },
-  { id: 'craft', label: '🔧 Crafteo', component: CraftingTable },
+  { id: 'planet', labelKey: 'tabs.planet', emoji: '🌍', component: PlanetView },
+  { id: 'map', labelKey: 'tabs.map', emoji: '🗺️', component: StarMap },
+  { id: 'inventory', labelKey: 'tabs.inventory', emoji: '🎒', component: Inventory },
+  { id: 'craft', labelKey: 'tabs.craft', emoji: '🔧', component: CraftingTable },
 ];
 
 function GameUI() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('planet');
   const ActiveComponent = TABS.find(t => t.id === activeTab)!.component;
 
@@ -41,8 +44,8 @@ function GameUI() {
       <header className="game-header">
         <div className="header-row">
           <div>
-            <h1>🚀 SpaceCraft</h1>
-            <p className="subtitle">Explora. Mina. Craftea.</p>
+            <h1>🚀 {t('app.title')}</h1>
+            <p className="subtitle">{t('app.subtitle')}</p>
           </div>
           <AuthUpgrade />
         </div>
@@ -61,7 +64,7 @@ function GameUI() {
             className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
             onClick={() => setActiveTab(tab.id)}
           >
-            {tab.label}
+            {tab.emoji} {t(tab.labelKey)}
           </button>
         ))}
       </nav>
@@ -70,10 +73,11 @@ function GameUI() {
 }
 
 function LoadingScreen() {
+  const { t } = useTranslation();
   return (
     <div className="loading-screen">
       <div className="loading-planet">🚀</div>
-      <p>Cargando SpaceCraft...</p>
+      <p>{t('app.loading')}</p>
     </div>
   );
 }

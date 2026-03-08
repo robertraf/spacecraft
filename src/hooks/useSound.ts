@@ -1,9 +1,9 @@
 /**
- * @fileoverview Hook de audio procedural para efectos de sonido del juego.
+ * @fileoverview Procedural audio hook for game sound effects.
  *
- * Genera sonidos en tiempo real usando la Web Audio API sin necesidad de
- * archivos de audio pregrabados. Incluye sonidos para minería, éxito, fallo
- * y taladro eléctrico.
+ * Generates sounds in real time using the Web Audio API without
+ * pre-recorded audio files. Includes sounds for mining, success,
+ * failure, and electric drill.
  *
  * @module useSound
  */
@@ -20,8 +20,8 @@ declare global {
 let audioContextInstance: AudioContext | null = null;
 
 /**
- * Obtiene o crea la instancia singleton del AudioContext.
- * Reanuda el contexto si está suspendido (requerimiento de autoplay del navegador).
+ * Gets or creates the singleton AudioContext instance.
+ * Resumes the context if suspended (browser autoplay requirement).
  */
 function getAudioContext(): AudioContext {
   if (!audioContextInstance) {
@@ -88,7 +88,7 @@ function playNoise(duration: number, volume = 0.08): void {
 }
 
 /**
- * Hook que provee funciones de audio procedural para eventos del juego.
+ * Hook that provides procedural audio functions for game events.
  */
 export function useSound() {
   const mineHit = useCallback(() => {

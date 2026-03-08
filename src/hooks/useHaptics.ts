@@ -1,9 +1,9 @@
 /**
- * @fileoverview Hook de feedback háptico para dispositivos móviles.
+ * @fileoverview Haptic feedback hook for mobile devices.
  *
- * Combina la Web Haptics API (`web-haptics`) con la API nativa de vibración
- * del navegador para proveer patrones de feedback táctil en diferentes
- * eventos del juego.
+ * Combines the Web Haptics API (`web-haptics`) with the browser's native
+ * vibration API to provide tactile feedback patterns for different
+ * game events.
  *
  * @module useHaptics
  */
@@ -12,7 +12,7 @@ import { useWebHaptics } from 'web-haptics/react';
 import { useRef, useCallback } from 'react';
 
 /**
- * Hook que provee funciones de feedback háptico para eventos del juego.
+ * Hook that provides haptic feedback functions for game events.
  */
 export function useHaptics() {
   const { trigger } = useWebHaptics({ debug: false });

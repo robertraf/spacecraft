@@ -1,13 +1,14 @@
 /**
- * @fileoverview Componente de inventario del jugador.
+ * @fileoverview Player inventory component.
  *
- * Muestra los ítems recolectados, el equipo actual y permite
- * equipar herramientas o descartar ítems. Los ítems se ordenan
- * por rareza (legendario primero).
+ * Displays collected items, current equipment, and allows
+ * equipping tools or discarding items. Items are sorted
+ * by rarity (legendary first).
  *
  * @module Inventory
  */
 
+import { useTranslation } from 'react-i18next';
 import { ITEMS, INVENTORY_SIZE, type Rarity } from '../data/gameData';
 import { useGame } from '../context/GameContext';
 import { useHaptics } from '../hooks/useHaptics';
@@ -16,6 +17,7 @@ const RARITY_SORT_ORDER: Record<Rarity, number> = { legendary: 0, rare: 1, uncom
 
 export default function Inventory() {
   const { inventory, equipment, equip, discard } = useGame();
+  const { t } = useTranslation();
   const haptics = useHaptics();
 
   const totalItems = Object.values(inventory).reduce((sum, n) => sum + n, 0);
@@ -37,19 +39,19 @@ export default function Inventory() {
 
   return (
     <div className="inventory">
-      <h3>🎒 Inventario ({totalItems}/{INVENTORY_SIZE})</h3>
+      <h3>🎒 {t('inventory.title', { count: totalItems, max: INVENTORY_SIZE })}</h3>
       <div className="inventory-bar">
         <div className="inventory-fill" style={{ width: `${(totalItems / INVENTORY_SIZE) * 100}%` }} />
       </div>
 
       {equipment.length > 0 && (
         <div className="equipment-section">
-          <h4>Equipado:</h4>
+          <h4>{t('inventory.equipped')}</h4>
           <div className="equipment-list">
             {equipment.map(id => (
               <span key={id} className="equipped-item">
-                {ITEMS[id].emoji} {ITEMS[id].name}
-                {ITEMS[id].effect && <span className="item-effect"> — {ITEMS[id].effect}</span>}
+                {ITEMS[id].emoji} {t(`items.${id}.name`)}
+                {ITEMS[id].hasEffect && <span className="item-effect"> — {t(`items.${id}.effect`)}</span>}
               </span>
             ))}
           </div>
@@ -69,11 +71,11 @@ export default function Inventory() {
                 <span className="item-icon">{item.emoji}</span>
                 <span className="item-count">x{count}</span>
               </div>
-              <span className="item-name">{item.name}</span>
-              {item.effect && <span className="item-effect-text">{item.effect}</span>}
+              <span className="item-name">{t(`items.${itemId}.name`)}</span>
+              {item.hasEffect && <span className="item-effect-text">{t(`items.${itemId}.effect`)}</span>}
               <div className="item-actions">
                 {isEquippable && !alreadyEquipped && (
-                  <button className="btn-equip" onClick={() => handleEquip(itemId)}>Equipar</button>
+                  <button className="btn-equip" onClick={() => handleEquip(itemId)}>{t('inventory.equip')}</button>
                 )}
                 <button className="btn-discard" onClick={() => handleDiscard(itemId)}>🗑️</button>
               </div>
@@ -81,7 +83,7 @@ export default function Inventory() {
           );
         })}
         {entries.length === 0 && (
-          <p className="empty-inventory">Tu inventario está vacío. ¡Ve a minar!</p>
+          <p className="empty-inventory">{t('inventory.empty')}</p>
         )}
       </div>
     </div>

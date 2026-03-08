@@ -1,18 +1,20 @@
 /**
- * @fileoverview Componente de mapa estelar para navegación entre planetas.
+ * @fileoverview Star map component for planet navigation.
  *
- * Muestra una grilla de planetas con sistema de niebla de guerra
- * (fog-of-war) donde los planetas no descubiertos aparecen ocultos.
+ * Displays a grid of planets with a fog-of-war system
+ * where undiscovered planets appear hidden.
  *
  * @module StarMap
  */
 
+import { useTranslation } from 'react-i18next';
 import { PLANETS } from '../data/gameData';
 import { useGame } from '../context/GameContext';
 import { useHaptics } from '../hooks/useHaptics';
 
 export default function StarMap() {
   const { currentPlanet, isTraveling, travelTarget, travel, discoveredPlanets } = useGame();
+  const { t } = useTranslation();
   const haptics = useHaptics();
 
   const handleTravel = (planetId: string) => {
@@ -22,7 +24,7 @@ export default function StarMap() {
 
   return (
     <div className="star-map">
-      <h3>🗺️ Mapa Estelar</h3>
+      <h3>🗺️ {t('starMap.title')}</h3>
       <div className="planets-grid">
         {PLANETS.map(planet => {
           const isCurrent = currentPlanet.id === planet.id;
@@ -38,9 +40,9 @@ export default function StarMap() {
               style={{ '--planet-color': planet.color } as React.CSSProperties}
             >
               <span className="planet-card-emoji">{discovered ? planet.emoji : '❓'}</span>
-              <span className="planet-card-name">{discovered ? planet.name : '???'}</span>
-              {isCurrent && <span className="here-badge">AQUÍ</span>}
-              {isTarget && <span className="traveling-badge">Viajando...</span>}
+              <span className="planet-card-name">{discovered ? t(`planets.${planet.id}.name`) : '???'}</span>
+              {isCurrent && <span className="here-badge">{t('starMap.here')}</span>}
+              {isTarget && <span className="traveling-badge">{t('starMap.traveling')}</span>}
             </button>
           );
         })}

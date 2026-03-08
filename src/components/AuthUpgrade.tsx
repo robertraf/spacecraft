@@ -1,14 +1,15 @@
 /**
- * @fileoverview Componente de autenticación y vinculación de cuenta.
+ * @fileoverview Authentication and account linking component.
  *
- * Permite a usuarios anónimos crear una cuenta con email/password para
- * persistir su progreso, o iniciar sesión en una cuenta existente.
- * También maneja el cierre de sesión para cuentas vinculadas.
+ * Allows anonymous users to create an account with email/password to
+ * persist their progress, or sign in to an existing account.
+ * Also handles sign-out for linked accounts.
  *
  * @module AuthUpgrade
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { useConvexAuth, useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
@@ -16,6 +17,7 @@ import { api } from '../../convex/_generated/api';
 export default function AuthUpgrade() {
   const { signIn, signOut } = useAuthActions();
   const { isAuthenticated } = useConvexAuth();
+  const { t } = useTranslation();
   const me = useQuery(api.players.getMe);
   const [open, setOpen] = useState(false);
   const [flow, setFlow] = useState<'signUp' | 'signIn'>('signUp');
@@ -32,7 +34,7 @@ export default function AuthUpgrade() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (flow === 'signUp' && password !== confirmPassword) {
-      setError('Las contraseñas no coinciden.');
+      setError(t('auth.passwordMismatch'));
       return;
     }
     setLoading(true);
@@ -43,8 +45,8 @@ export default function AuthUpgrade() {
     } catch {
       setError(
         flow === 'signUp'
-          ? 'No se pudo crear la cuenta. Intenta con otro email.'
-          : 'Email o contraseña incorrectos.'
+          ? t('auth.signUpError')
+          : t('auth.signInError')
       );
     } finally {
       setLoading(false);
@@ -64,7 +66,7 @@ export default function AuthUpgrade() {
       <button
         className={`auth-upgrade-btn ${isLinked ? 'linked' : ''}`}
         onClick={() => setOpen(true)}
-        title={isLinked ? `Cuenta: ${me.email}` : 'Vincular cuenta para guardar progreso'}
+        title={isLinked ? t('auth.accountTooltip', { email: me.email }) : t('auth.linkTooltip')}
       >
         {isLinked ? '👤' : '💾'}
       </button>
@@ -76,9 +78,9 @@ export default function AuthUpgrade() {
 
             {isLinked ? (
               <>
-                <h2>Cuenta vinculada</h2>
+                <h2>{t('auth.linkedAccount')}</h2>
                 <p className="auth-modal-desc">
-                  Tu progreso se guarda automáticamente en <strong>{me.email}</strong>
+                  {t('auth.autoSave', { email: me.email })}
                 </p>
                 <button
                   onClick={async () => {
@@ -88,27 +90,27 @@ export default function AuthUpgrade() {
                       window.location.reload();
                     } catch (err) {
                       console.error('Error during sign-out flow', err);
-                      setError('Ocurrió un problema al cerrar sesión. Inténtalo de nuevo.');
+                      setError(t('auth.signOutError'));
                     }
                   }}
                   className="auth-btn secondary"
                 >
-                  Cerrar sesión
+                  {t('auth.signOut')}
                 </button>
               </>
             ) : (
               <>
-                <h2>{flow === 'signUp' ? 'Guardar progreso' : 'Iniciar sesión'}</h2>
+                <h2>{flow === 'signUp' ? t('auth.saveProgress') : t('auth.signIn')}</h2>
                 <p className="auth-modal-desc">
                   {flow === 'signUp'
-                    ? 'Crea una cuenta para guardar tu progreso en todos tus dispositivos.'
-                    : 'Inicia sesión para restaurar tu progreso guardado.'}
+                    ? t('auth.signUpDesc')
+                    : t('auth.signInDesc')}
                 </p>
 
                 <form onSubmit={handleSubmit} className="auth-form">
                   <input
                     type="email"
-                    placeholder="tu@email.com"
+                    placeholder={t('auth.emailPlaceholder')}
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     required
@@ -116,7 +118,7 @@ export default function AuthUpgrade() {
                   />
                   <input
                     type="password"
-                    placeholder="Contraseña (mín. 8 caracteres)"
+                    placeholder={t('auth.passwordPlaceholder')}
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     required
@@ -126,7 +128,7 @@ export default function AuthUpgrade() {
                   {flow === 'signUp' && (
                     <input
                       type="password"
-                      placeholder="Confirmar contraseña"
+                      placeholder={t('auth.confirmPasswordPlaceholder')}
                       value={confirmPassword}
                       onChange={e => setConfirmPassword(e.target.value)}
                       required
@@ -135,8 +137,8 @@ export default function AuthUpgrade() {
                   )}
                   <button type="submit" disabled={loading} className="auth-btn primary">
                     {loading
-                      ? (flow === 'signUp' ? 'Creando cuenta...' : 'Entrando...')
-                      : (flow === 'signUp' ? 'Crear cuenta' : 'Iniciar sesión')}
+                      ? (flow === 'signUp' ? t('auth.creatingAccount') : t('auth.signingIn'))
+                      : (flow === 'signUp' ? t('auth.createAccount') : t('auth.signIn'))}
                   </button>
                 </form>
 
@@ -146,7 +148,7 @@ export default function AuthUpgrade() {
                   className="auth-btn secondary"
                   style={{ marginTop: 8 }}
                 >
-                  {flow === 'signUp' ? '¿Ya tienes cuenta? Inicia sesión' : '¿Sin cuenta? Regístrate'}
+                  {flow === 'signUp' ? t('auth.haveAccount') : t('auth.noAccount')}
                 </button>
 
                 {error && <p className="auth-error">{error}</p>}
