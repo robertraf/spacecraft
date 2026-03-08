@@ -1,14 +1,15 @@
 /**
  * @fileoverview Star map component for planet navigation.
  *
- * Displays a grid of planets with a fog-of-war system
- * where undiscovered planets appear hidden.
+ * Displays a grid of planets. All planets show their real emoji and name
+ * so new users immediately understand they can travel anywhere.
  *
  * @module StarMap
  */
 
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PLANETS } from '../data/gameData';
+import { PLANETS, ITEMS } from '../data/gameData';
 import { useGame } from '../context/GameContext';
 import { useHaptics } from '../hooks/useHaptics';
 
@@ -22,6 +23,16 @@ export default function StarMap() {
     travel(planetId);
   };
 
+  // Pulse haptics throughout the entire travel loading state
+  useEffect(() => {
+    if (isTraveling) {
+      haptics.travelPulse();
+    } else {
+      haptics.stopTravelPulse();
+    }
+    return () => haptics.stopTravelPulse();
+  }, [isTraveling]);
+
   return (
     <div className="star-map">
       <h3>🗺️ {t('starMap.title')}</h3>
@@ -34,13 +45,25 @@ export default function StarMap() {
           return (
             <button
               key={planet.id}
-              className={`planet-card ${isCurrent ? 'current' : ''} ${isTarget ? 'traveling' : ''} ${!discovered ? 'undiscovered' : ''}`}
+              className={`planet-card ${isCurrent ? 'current' : ''} ${isTarget ? 'traveling' : ''} ${!discovered ? 'unvisited' : ''}`}
               onClick={() => handleTravel(planet.id)}
               disabled={isCurrent || isTraveling}
               style={{ '--planet-color': planet.color } as React.CSSProperties}
             >
-              <span className="planet-card-emoji">{discovered ? planet.emoji : '❓'}</span>
-              <span className="planet-card-name">{discovered ? t(`planets.${planet.id}.name`) : '???'}</span>
+              <span className="planet-card-emoji">{planet.emoji}</span>
+              <span className="planet-card-name">{t(`planets.${planet.id}.name`)}</span>
+              <div className="planet-card-danger">
+                {Array.from({ length: planet.dangerLevel }, (_, i) => (
+                  <span key={i}>⚠️</span>
+                ))}
+              </div>
+              <div className="planet-card-resources">
+                {planet.resources.map(r => (
+                  <span key={r} className="resource-mini-icon" title={r}>
+                    {ITEMS[r]?.emoji}
+                  </span>
+                ))}
+              </div>
               {isCurrent && <span className="here-badge">{t('starMap.here')}</span>}
               {isTarget && <span className="traveling-badge">{t('starMap.traveling')}</span>}
             </button>
