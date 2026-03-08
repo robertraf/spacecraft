@@ -60,6 +60,11 @@
     "accountTooltip": "Account: {{email}}",
     "linkTooltip": "Link account to save progress"
   },
+  "stats": {
+    "mined": "mined",
+    "crafted": "crafted",
+    "planets": "planets"
+  },
   "log": {
     "welcome": "Welcome to space, explorer! You are on Terra Nova.",
     "welcomeBack": "Welcome back! Your progress has been restored.",

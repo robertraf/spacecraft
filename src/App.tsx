@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { useConvexAuth } from 'convex/react';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { GameProvider } from './context/GameContext';
+import { useGame } from './context/GameContext';
 import PlanetView from './components/PlanetView';
 import StarMap from './components/StarMap';
 import Inventory from './components/Inventory';
@@ -39,6 +40,7 @@ const TABS: Tab[] = [
 
 function GameUI() {
   const { t } = useTranslation();
+  const { stats } = useGame();
   const [activeTab, setActiveTab] = useState('planet');
   const ActiveComponent = TABS.find(t => t.id === activeTab)!.component;
   const haptics = useHaptics();
@@ -52,6 +54,20 @@ function GameUI() {
             <p className="subtitle">{t('app.subtitle')}</p>
           </div>
           <AuthUpgrade />
+        </div>
+        <div className="stats-bar">
+          <div className="stat-item">
+            <span className="stat-value">⛏️ {stats.itemsMined}</span>
+            <span className="stat-label">{t('stats.mined')}</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-value">🔧 {stats.itemsCrafted}</span>
+            <span className="stat-label">{t('stats.crafted')}</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-value">🌍 {stats.planetsVisited}</span>
+            <span className="stat-label">{t('stats.planets')}</span>
+          </div>
         </div>
       </header>
 

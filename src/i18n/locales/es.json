@@ -60,6 +60,11 @@
     "accountTooltip": "Cuenta: {{email}}",
     "linkTooltip": "Vincular cuenta para guardar progreso"
   },
+  "stats": {
+    "mined": "minados",
+    "crafted": "crafteados",
+    "planets": "planetas"
+  },
   "log": {
     "welcome": "¡Bienvenido al espacio, explorador! Estás en Terra Nova.",
     "welcomeBack": "¡Bienvenido de vuelta! Tu progreso ha sido restaurado.",
