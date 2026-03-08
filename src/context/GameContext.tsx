@@ -27,6 +27,7 @@ import {
   type Planet,
   type Recipe,
 } from '../data/gameData';
+import type { BattleReward } from '../data/battleData';
 
 export interface LogEntry {
   key: string;
@@ -60,6 +61,7 @@ interface GameActions {
   equip: (itemId: string) => void;
   discard: (itemId: string, amount?: number) => void;
   canCraft: (recipe: Recipe) => boolean;
+  addBattleRewards: (rewards: BattleReward[]) => void;
 }
 
 type GameContextValue = GameState & GameActions;
@@ -134,7 +136,8 @@ type GameAction =
   | { type: 'CRAFT'; payload: Recipe }
   | { type: 'EQUIP'; payload: string }
   | { type: 'DISCARD'; payload: { itemId: string; amount: number } }
-  | { type: 'ADD_LOG'; payload: { key: string; type: string; params?: Record<string, string | number> } };
+  | { type: 'ADD_LOG'; payload: { key: string; type: string; params?: Record<string, string | number> } }
+  | { type: 'BATTLE_REWARDS'; payload: BattleReward[] };
 
 function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
@@ -268,6 +271,28 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         log: appendLog(state.log, action.payload.key, action.payload.type, action.payload.params),
       };
+
+    case 'BATTLE_REWARDS': {
+      let inv: Record<string, number> = { ...state.inventory };
+      const added: string[] = [];
+      for (const reward of action.payload) {
+        const result = addToInventory(inv, reward.itemId, reward.amount);
+        if (result) {
+          inv = result;
+          const item = ITEMS[reward.itemId];
+          if (item) added.push(`${reward.amount}x ${item.emoji}`);
+        }
+      }
+      const logMsg = added.length > 0 ? added.join(', ') : '';
+      return {
+        ...state,
+        inventory: inv,
+        stats: { ...state.stats, itemsMined: state.stats.itemsMined + action.payload.reduce((s: number, r: BattleReward) => s + r.amount, 0) },
+        log: added.length > 0
+          ? appendLog(state.log, 'log.battleRewards', 'success', { items: logMsg })
+          : state.log,
+      };
+    }
 
     default:
       return state;
@@ -420,10 +445,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     return true;
   }, [state.inventory]);
 
+  const addBattleRewards = useCallback((rewards: BattleReward[]) => {
+    dispatch({ type: 'BATTLE_REWARDS', payload: rewards });
+  }, []);
+
   return (
     <GameContext.Provider value={{
       ...state,
-      mine, travel, craft, equip, discard, canCraft,
+      mine, travel, craft, equip, discard, canCraft, addBattleRewards,
     }}>
       {children}
     </GameContext.Provider>

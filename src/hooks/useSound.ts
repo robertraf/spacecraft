@@ -146,5 +146,28 @@ export function useSound() {
     playNoise(duration, 0.05);
   }, []);
 
-  return { mineHit, mineSuccess, mineFail, electricDrill };
+  const shoot = useCallback(() => {
+    playTone(880, 0.08, 'square', 0.1);
+    playTone(1200, 0.05, 'sine', 0.06);
+  }, []);
+
+  const alienDeath = useCallback(() => {
+    playTone(400, 0.06, 'square', 0.08);
+    playTone(200, 0.1, 'sawtooth', 0.06);
+    playNoise(0.05, 0.06);
+  }, []);
+
+  const explosion = useCallback(() => {
+    playNoise(0.3, 0.15);
+    playTone(100, 0.3, 'sawtooth', 0.1);
+  }, []);
+
+  const waveClear = useCallback(() => {
+    playTone(523, 0.1, 'sine', 0.1);
+    setTimeout(() => playTone(659, 0.1, 'sine', 0.1), 100);
+    setTimeout(() => playTone(784, 0.1, 'sine', 0.1), 200);
+    setTimeout(() => playTone(1047, 0.2, 'sine', 0.12), 300);
+  }, []);
+
+  return { mineHit, mineSuccess, mineFail, electricDrill, shoot, alienDeath, explosion, waveClear };
 }

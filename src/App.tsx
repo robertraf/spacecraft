@@ -16,6 +16,7 @@ import PlanetView from './components/PlanetView';
 import StarMap from './components/StarMap';
 import Inventory from './components/Inventory';
 import CraftingTable from './components/CraftingTable';
+import SpaceInvaders from './components/SpaceInvaders';
 import GameLog from './components/GameLog';
 import AuthUpgrade from './components/AuthUpgrade';
 import './App.css';
@@ -30,6 +31,7 @@ interface Tab {
 const TABS: Tab[] = [
   { id: 'planet', labelKey: 'tabs.planet', emoji: '🌍', component: PlanetView },
   { id: 'map', labelKey: 'tabs.map', emoji: '🗺️', component: StarMap },
+  { id: 'battle', labelKey: 'tabs.battle', emoji: '👾', component: SpaceInvaders },
   { id: 'inventory', labelKey: 'tabs.inventory', emoji: '🎒', component: Inventory },
   { id: 'craft', labelKey: 'tabs.craft', emoji: '🔧', component: CraftingTable },
 ];
