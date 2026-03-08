@@ -21,7 +21,7 @@ export const GRID_ROWS = 12;
 export const ALIEN_DESCENT_TICKS = 8;
 
 /** Base chance an alien fires a bullet each tick (per alien). */
-export const ALIEN_FIRE_CHANCE = 0.03;
+export const ALIEN_FIRE_CHANCE = 0.015;
 
 /** Player starting lives. */
 export const BASE_LIVES = 3;
