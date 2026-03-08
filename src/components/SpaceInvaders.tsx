@@ -509,19 +509,14 @@ export default function SpaceInvaders() {
   // ---------------------------------------------------------------------------
   return (
     <div className="space-invaders">
-      <div className="si-header">
-        <h3>👾 {t('battle.title')}</h3>
-        {uiPhase === 'playing' && (
-          <div className="si-stats">
-            <span className="si-score">{t('battle.score')}: {uiScore}</span>
-            <span className="si-wave">{t('battle.wave')}: {uiWave}</span>
-            <span className="si-lives">{'❤️'.repeat(Math.max(0, uiLives))}</span>
-          </div>
-        )}
-        {uiHighScore > 0 && (
-          <div className="si-high-score">{t('battle.highScore')}: {uiHighScore}</div>
-        )}
-      </div>
+      {uiPhase !== 'playing' && (
+        <div className="si-header">
+          <h3>👾 {t('battle.title')}</h3>
+          {uiHighScore > 0 && (
+            <div className="si-high-score">{t('battle.highScore')}: {uiHighScore}</div>
+          )}
+        </div>
+      )}
 
       {uiPhase === 'idle' && (
         <div className="si-start-screen">

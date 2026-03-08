@@ -926,7 +926,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  width: 100%;
 }
 
 .si-header {
@@ -958,7 +959,11 @@
 /* Canvas */
 .si-canvas {
   width: 100%;
-  max-width: 480px;
+  max-width: 360px;
+  /* Constrain height so controls stay visible above the fixed navbar.
+     svh = small viewport height (excludes browser chrome on mobile).
+     160px = game-main padding (8) + gap (8) + controls height (~80) + nav (60) + margin (4) */
+  max-height: calc(100svh - 160px);
   aspect-ratio: 3 / 4;
   border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: 12px;
