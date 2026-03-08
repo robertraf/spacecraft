@@ -855,6 +855,234 @@
   text-align: center;
 }
 
+/* ===== SPACE INVADERS ===== */
+.space-invaders {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.si-header {
+  width: 100%;
+  text-align: center;
+}
+
+.si-header h3 {
+  font-size: 1.2rem;
+  margin-bottom: 6px;
+}
+
+.si-stats {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.si-score { color: var(--warning); font-weight: 700; }
+.si-wave { color: var(--accent); }
+.si-high-score {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Grid */
+.si-grid {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 9 / 12;
+  max-width: 360px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+}
+
+.si-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.7rem, 2.5vw, 1.2rem);
+  min-height: 0;
+}
+
+.si-alien {
+  animation: si-float 1.5s ease-in-out infinite;
+}
+
+.si-alien-damaged {
+  opacity: 0.6;
+}
+
+@keyframes si-float {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.si-ship {
+  font-size: clamp(0.9rem, 3vw, 1.4rem);
+  filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.6));
+}
+
+.si-bullet-player {
+  color: #22c55e;
+  font-weight: 900;
+  font-size: 0.9rem;
+  text-shadow: 0 0 6px #22c55e;
+}
+
+.si-bullet-alien {
+  color: #ef4444;
+  font-weight: 900;
+  font-size: 0.7rem;
+  text-shadow: 0 0 6px #ef4444;
+}
+
+/* Controls */
+.si-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.si-ctrl-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  color: var(--text-primary);
+}
+
+.si-ctrl-btn:active {
+  transform: scale(0.9);
+  background: rgba(99, 102, 241, 0.2);
+}
+
+.si-fire-btn {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, var(--accent), #4f46e5);
+  border-color: var(--accent);
+  font-size: 1.5rem;
+}
+
+.si-teleport-btn {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.si-teleport-btn.cooldown {
+  opacity: 0.4;
+}
+
+/* Start screen */
+.si-start-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 16px;
+}
+
+.si-start-planet {
+  animation: float 3s ease-in-out infinite;
+}
+
+.si-big-emoji {
+  font-size: 4rem;
+}
+
+.si-start-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+  max-width: 280px;
+}
+
+.si-bonuses {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 10px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.si-bonuses h4 {
+  font-size: 0.75rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.si-bonus {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.si-start-btn {
+  width: 100%;
+  max-width: 280px;
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), #4f46e5);
+  color: white;
+  transition: all 0.2s;
+}
+
+.si-start-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+.si-collect-btn {
+  width: 100%;
+  max-width: 280px;
+  padding: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--success), #16a34a);
+  color: white;
+  transition: all 0.2s;
+}
+
+.si-collect-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 12px rgba(34, 197, 94, 0.3);
+}
+
+/* Wave clear / Game over overlays */
+.si-wave-clear,
+.si-game-over {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.si-wave-clear h3 { color: var(--success); }
+.si-game-over h3 { color: var(--error); }
+
 /* ===== STARS BACKGROUND ===== */
 body::before {
   content: '';

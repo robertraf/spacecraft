@@ -7,6 +7,7 @@
   "tabs": {
     "planet": "Planet",
     "map": "Map",
+    "battle": "Battle",
     "inventory": "Inventory",
     "craft": "Crafting"
   },
@@ -71,7 +72,29 @@
     "arrived": "Arrived at {{emoji}} {{name}}",
     "equipped": "Equipped {{emoji}} {{name}}",
     "discarded": "Discarded {{amount}}x {{name}}",
-    "nothing": "Nothing!"
+    "nothing": "Nothing!",
+    "battleRewards": "Battle rewards: {{items}}"
+  },
+  "battle": {
+    "title": "Space Invaders",
+    "description": "Defend {{planet}} from alien invaders! Your equipment gives you battle bonuses.",
+    "start": "Start Battle",
+    "score": "Score",
+    "wave": "Wave",
+    "highScore": "High Score",
+    "waveClear": "Wave {{wave}} cleared!",
+    "nextWave": "Next Wave",
+    "collectRewards": "Collect Rewards",
+    "gameOver": "Game Over",
+    "finalScore": "Score: {{score}} — Reached wave {{wave}}",
+    "playAgain": "Play Again",
+    "equipmentBonuses": "Equipment Bonuses",
+    "bonusExtraBullets": "extra shots",
+    "bonusPiercing": "Piercing shots",
+    "bonusExtraLives": "extra lives",
+    "bonusFastShip": "Fast ship",
+    "bonusDamage": "damage",
+    "bonusTeleport": "Teleport ability"
   },
   "items": {
     "iron-ore": { "name": "Iron Ore" },

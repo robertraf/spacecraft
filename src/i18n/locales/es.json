@@ -7,6 +7,7 @@
   "tabs": {
     "planet": "Planeta",
     "map": "Mapa",
+    "battle": "Batalla",
     "inventory": "Inventario",
     "craft": "Crafteo"
   },
@@ -71,7 +72,29 @@
     "arrived": "Llegaste a {{emoji}} {{name}}",
     "equipped": "Equipaste {{emoji}} {{name}}",
     "discarded": "Descartaste {{amount}}x {{name}}",
-    "nothing": "¡Nada!"
+    "nothing": "¡Nada!",
+    "battleRewards": "Recompensas de batalla: {{items}}"
+  },
+  "battle": {
+    "title": "Space Invaders",
+    "description": "¡Defiende {{planet}} de los invasores alienígenas! Tu equipo te da bonificaciones de batalla.",
+    "start": "Iniciar Batalla",
+    "score": "Puntos",
+    "wave": "Oleada",
+    "highScore": "Récord",
+    "waveClear": "¡Oleada {{wave}} completada!",
+    "nextWave": "Siguiente Oleada",
+    "collectRewards": "Recoger Recompensas",
+    "gameOver": "Fin del Juego",
+    "finalScore": "Puntos: {{score}} — Llegaste a la oleada {{wave}}",
+    "playAgain": "Jugar de Nuevo",
+    "equipmentBonuses": "Bonificaciones de Equipo",
+    "bonusExtraBullets": "disparos extra",
+    "bonusPiercing": "Disparos perforantes",
+    "bonusExtraLives": "vidas extra",
+    "bonusFastShip": "Nave rápida",
+    "bonusDamage": "daño",
+    "bonusTeleport": "Habilidad de teletransporte"
   },
   "items": {
     "iron-ore": { "name": "Mineral de Hierro" },
