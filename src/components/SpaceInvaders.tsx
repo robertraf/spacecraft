@@ -121,7 +121,7 @@ export default function SpaceInvaders() {
   const [uiPhase, setUiPhase] = useState<'idle' | 'playing' | 'wave-clear' | 'game-over'>('idle');
   const [uiScore, setUiScore] = useState(0);
   const [uiWave, setUiWave] = useState(0);
-  const [uiLives, setUiLives] = useState(BASE_LIVES);
+  const [, setUiLives] = useState(BASE_LIVES);
   const [uiHighScore, setUiHighScore] = useState(0);
 
   // ---------------------------------------------------------------------------
