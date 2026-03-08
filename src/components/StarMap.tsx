@@ -11,24 +11,11 @@ import { PLANETS } from '../data/gameData';
 import { useGame } from '../context/GameContext';
 import { useHaptics } from '../hooks/useHaptics';
 
-/**
- * Mapa estelar interactivo que permite viajar entre planetas.
- *
- * Cada planeta se muestra como una tarjeta con su emoji y nombre.
- * Los planetas no descubiertos muestran "???" hasta que el jugador los visite.
- * El planeta actual se resalta y no se puede seleccionar como destino.
- *
- * @returns {import('react').JSX.Element}
- */
 export default function StarMap() {
   const { currentPlanet, isTraveling, travelTarget, travel, discoveredPlanets } = useGame();
   const haptics = useHaptics();
 
-  /**
-   * Inicia el viaje a un planeta con feedback háptico.
-   * @param {string} planetId - ID del planeta destino.
-   */
-  const handleTravel = (planetId) => {
+  const handleTravel = (planetId: string) => {
     haptics.travel();
     travel(planetId);
   };
@@ -48,7 +35,7 @@ export default function StarMap() {
               className={`planet-card ${isCurrent ? 'current' : ''} ${isTarget ? 'traveling' : ''} ${!discovered ? 'undiscovered' : ''}`}
               onClick={() => handleTravel(planet.id)}
               disabled={isCurrent || isTraveling}
-              style={{ '--planet-color': planet.color }}
+              style={{ '--planet-color': planet.color } as React.CSSProperties}
             >
               <span className="planet-card-emoji">{discovered ? planet.emoji : '❓'}</span>
               <span className="planet-card-name">{discovered ? planet.name : '???'}</span>

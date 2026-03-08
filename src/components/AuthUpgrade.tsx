@@ -13,25 +13,12 @@ import { useAuthActions } from '@convex-dev/auth/react';
 import { useConvexAuth, useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 
-/**
- * Botón y modal de gestión de cuenta del jugador.
- *
- * Si el usuario no tiene cuenta vinculada, muestra un botón de "guardar"
- * que abre un modal para crear cuenta o iniciar sesión. Si ya tiene
- * cuenta vinculada, muestra el email y opción de cerrar sesión.
- *
- * Nota: Usa `window.location.reload()` después de cambios de autenticación
- * porque Convex Auth no refresca reactivamente las suscripciones de queries
- * en memoria después de `signIn`.
- *
- * @returns {import('react').JSX.Element|null} `null` si no está autenticado.
- */
 export default function AuthUpgrade() {
   const { signIn, signOut } = useAuthActions();
   const { isAuthenticated } = useConvexAuth();
   const me = useQuery(api.players.getMe);
   const [open, setOpen] = useState(false);
-  const [flow, setFlow] = useState('signUp');
+  const [flow, setFlow] = useState<'signUp' | 'signIn'>('signUp');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -42,13 +29,7 @@ export default function AuthUpgrade() {
 
   const isLinked = !!me?.email;
 
-  /**
-   * Maneja el envío del formulario de autenticación.
-   * Valida contraseñas en modo registro y ejecuta signIn con el proveedor "password".
-   *
-   * @param {import('react').FormEvent} e - Evento del formulario.
-   */
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (flow === 'signUp' && password !== confirmPassword) {
       setError('Las contraseñas no coinciden.');
@@ -70,9 +51,6 @@ export default function AuthUpgrade() {
     }
   }
 
-  /**
-   * Cierra el modal y limpia el estado del formulario.
-   */
   function handleClose() {
     setOpen(false);
     setEmail('');

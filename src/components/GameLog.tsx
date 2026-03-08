@@ -9,15 +9,6 @@
 
 import { useGame } from '../context/GameContext';
 
-/**
- * Panel de log de eventos con barra de estadísticas.
- *
- * La barra superior muestra contadores de ítems minados, crafteados y
- * planetas visitados. Debajo, las entradas del log se muestran en orden
- * cronológico inverso con colores según el tipo de evento.
- *
- * @returns {import('react').JSX.Element}
- */
 export default function GameLog() {
   const { log, stats } = useGame();
 

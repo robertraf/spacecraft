@@ -25,27 +25,48 @@ import {
   RARE_WEIGHT_WITH_SCANNER,
   UNCOMMON_WEIGHT,
   COMMON_WEIGHT,
+  type Planet,
+  type Recipe,
 } from '../data/gameData';
 
-/**
- * @typedef {Object} GameState
- * @property {import('../data/gameData').Planet} currentPlanet - Planeta actual del jugador.
- * @property {Record<string, number>} inventory - Mapa de itemId a cantidad en inventario.
- * @property {string[]} craftedItems - IDs de items que el jugador ha crafteado al menos una vez.
- * @property {string[]} discoveredPlanets - IDs de planetas descubiertos.
- * @property {string[]} equipment - IDs de items equipados actualmente.
- * @property {boolean} isTraveling - Indica si el jugador esta viajando.
- * @property {boolean} isMining - Indica si el jugador esta minando.
- * @property {string|null} travelTarget - ID del planeta destino, o null.
- * @property {Array<{text: string, type: string}>} log - Historial de acciones del juego.
- * @property {{itemsMined: number, itemsCrafted: number, planetsVisited: number}} stats - Estadisticas acumuladas.
- */
+interface LogEntry {
+  text: string;
+  type: string;
+}
 
-/** @type {import('react').Context<GameState|null>} */
-const GameContext = createContext(null);
+interface Stats {
+  itemsMined: number;
+  itemsCrafted: number;
+  planetsVisited: number;
+}
 
-/** @type {GameState} */
-const initialState = {
+interface GameState {
+  currentPlanet: Planet;
+  inventory: Record<string, number>;
+  craftedItems: string[];
+  discoveredPlanets: string[];
+  equipment: string[];
+  isTraveling: boolean;
+  isMining: boolean;
+  travelTarget: string | null;
+  log: LogEntry[];
+  stats: Stats;
+}
+
+interface GameActions {
+  mine: () => void;
+  travel: (planetId: string) => void;
+  craft: (recipe: Recipe) => void;
+  equip: (itemId: string) => void;
+  discard: (itemId: string, amount?: number) => void;
+  canCraft: (recipe: Recipe) => boolean;
+}
+
+type GameContextValue = GameState & GameActions;
+
+const GameContext = createContext<GameContextValue | null>(null);
+
+const initialState: GameState = {
   currentPlanet: PLANETS[0],
   inventory: {},
   craftedItems: [],
@@ -58,41 +79,25 @@ const initialState = {
   stats: { itemsMined: 0, itemsCrafted: 0, planetsVisited: 1 },
 };
 
-/**
- * Obtiene la cantidad de un item en el inventario.
- *
- * @param {Record<string, number>} inventory - Inventario actual.
- * @param {string} itemId - ID del item a consultar.
- * @returns {number} Cantidad del item (0 si no existe).
- */
-function getItemCount(inventory, itemId) {
+function getItemCount(inventory: Record<string, number>, itemId: string): number {
   return inventory[itemId] || 0;
 }
 
-/**
- * Agrega una cantidad de un item al inventario respetando el limite de capacidad.
- *
- * @param {Record<string, number>} inventory - Inventario actual (inmutable).
- * @param {string} itemId - ID del item a agregar.
- * @param {number} [amount=1] - Cantidad a agregar.
- * @returns {Record<string, number>|null} Nuevo inventario o `null` si excede la capacidad.
- */
-function addToInventory(inventory, itemId, amount = 1) {
+function addToInventory(
+  inventory: Record<string, number>,
+  itemId: string,
+  amount = 1,
+): Record<string, number> | null {
   const totalItems = Object.values(inventory).reduce((sum, n) => sum + n, 0);
   if (totalItems + amount > INVENTORY_SIZE) return null;
   return { ...inventory, [itemId]: (inventory[itemId] || 0) + amount };
 }
 
-/**
- * Remueve una cantidad de un item del inventario.
- * Elimina la clave del inventario si la cantidad llega a cero.
- *
- * @param {Record<string, number>} inventory - Inventario actual (inmutable).
- * @param {string} itemId - ID del item a remover.
- * @param {number} [amount=1] - Cantidad a remover.
- * @returns {Record<string, number>|null} Nuevo inventario o `null` si no hay suficientes items.
- */
-function removeFromInventory(inventory, itemId, amount = 1) {
+function removeFromInventory(
+  inventory: Record<string, number>,
+  itemId: string,
+  amount = 1,
+): Record<string, number> | null {
   const current = inventory[itemId] || 0;
   if (current < amount) return null;
   const next = { ...inventory };
@@ -101,30 +106,41 @@ function removeFromInventory(inventory, itemId, amount = 1) {
   return next;
 }
 
-/**
- * Agrega una entrada al log del juego, manteniendo el limite de {@link MAX_LOG_ENTRIES}.
- *
- * @param {Array<{text: string, type: string}>} log - Log actual.
- * @param {string} text - Texto del mensaje.
- * @param {string} type - Tipo de mensaje ('info'|'success'|'warning'|'error').
- * @returns {Array<{text: string, type: string}>} Nuevo log con la entrada al inicio.
- */
-function appendLog(log, text, type) {
+function appendLog(log: LogEntry[], text: string, type: string): LogEntry[] {
   return [{ text, type }, ...log].slice(0, MAX_LOG_ENTRIES);
 }
 
-/**
- * Reducer principal del juego. Procesa todas las acciones que modifican el estado.
- *
- * @param {GameState} state - Estado actual.
- * @param {{type: string, payload?: *}} action - Accion despachada.
- * @returns {GameState} Nuevo estado.
- */
-function gameReducer(state, action) {
+// ---------------------------------------------------------------------------
+// Action types
+// ---------------------------------------------------------------------------
+
+type GameAction =
+  | {
+      type: 'LOAD_SAVED';
+      payload: {
+        currentPlanetId: string;
+        discoveredPlanets: string[];
+        inventory: Record<string, number>;
+        equipment: string[];
+        craftedItems: string[];
+        stats: Stats;
+      };
+    }
+  | { type: 'MINE_START' }
+  | { type: 'MINE_COMPLETE'; payload: { itemId: string; amount: number } }
+  | { type: 'MINE_FAIL' }
+  | { type: 'TRAVEL_START'; payload: string }
+  | { type: 'TRAVEL_COMPLETE'; payload: string }
+  | { type: 'CRAFT'; payload: Recipe }
+  | { type: 'EQUIP'; payload: string }
+  | { type: 'DISCARD'; payload: { itemId: string; amount: number } }
+  | { type: 'ADD_LOG'; payload: { text: string; type: string } };
+
+function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'LOAD_SAVED': {
       const { currentPlanetId, discoveredPlanets, inventory, equipment, craftedItems, stats } = action.payload;
-      const planet = PLANETS.find(p => p.id === currentPlanetId) || PLANETS[0];
+      const planet = PLANETS.find(p => p.id === currentPlanetId) ?? PLANETS[0];
       const safeInventory = Object.fromEntries(
         Object.entries(inventory || {}).filter(([itemId]) => ITEMS[itemId])
       );
@@ -180,7 +196,7 @@ function gameReducer(state, action) {
       return { ...state, isTraveling: true, travelTarget: action.payload };
 
     case 'TRAVEL_COMPLETE': {
-      const planet = PLANETS.find(p => p.id === action.payload);
+      const planet = PLANETS.find(p => p.id === action.payload) ?? PLANETS[0];
       const discovered = state.discoveredPlanets.includes(planet.id)
         ? state.discoveredPlanets
         : [...state.discoveredPlanets, planet.id];
@@ -197,7 +213,7 @@ function gameReducer(state, action) {
 
     case 'CRAFT': {
       const recipe = action.payload;
-      let inv = { ...state.inventory };
+      let inv: Record<string, number> | null = { ...state.inventory };
       for (const [itemId, amount] of Object.entries(recipe.inputs)) {
         inv = removeFromInventory(inv, itemId, amount);
         if (!inv) {
@@ -258,16 +274,13 @@ function gameReducer(state, action) {
   }
 }
 
-/**
- * Calcula la cantidad de recursos obtenidos al minar segun el equipo del jugador.
- *
- * @param {Object} flags - Flags de equipo del jugador.
- * @param {boolean} flags.hasDrill - Tiene taladro cuantico equipado.
- * @param {boolean} flags.hasElectricPickaxe - Tiene pico electrico equipado.
- * @param {boolean} flags.hasPickaxe - Tiene pico espacial equipado.
- * @returns {number} Cantidad de recursos a obtener.
- */
-function calculateMineAmount({ hasDrill, hasElectricPickaxe, hasPickaxe }) {
+interface MineFlags {
+  hasDrill: boolean;
+  hasElectricPickaxe: boolean;
+  hasPickaxe: boolean;
+}
+
+function calculateMineAmount({ hasDrill, hasElectricPickaxe, hasPickaxe }: MineFlags): number {
   if (hasDrill) return Math.random() < 0.5 ? 3 : 2;
   if (hasElectricPickaxe) return Math.random() < 0.5 ? 3 : 2;
   if (hasPickaxe) return Math.random() < 0.5 ? 2 : 1;
@@ -276,26 +289,17 @@ function calculateMineAmount({ hasDrill, hasElectricPickaxe, hasPickaxe }) {
 
 /**
  * Proveedor del contexto global del juego.
- *
- * Envuelve a los componentes hijos con el estado del juego y las acciones
- * disponibles (minar, viajar, craftear, equipar, descartar).
- * Sincroniza automaticamente el estado con Convex cuando cambia.
- *
- * @param {Object} props
- * @param {import('react').ReactNode} props.children - Componentes hijos.
- * @returns {import('react').JSX.Element}
  */
-export function GameProvider({ children }) {
+export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const savedPlayer = useQuery(api.players.getMyPlayer);
   const saveState = useMutation(api.players.saveGameState);
 
   const hasLoaded = useRef(false);
   const skipNextSync = useRef(false);
-  const mineTimeoutRef = useRef(null);
-  const travelTimeoutRef = useRef(null);
+  const mineTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const travelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Limpieza de timeouts al desmontar para evitar memory leaks
   useEffect(() => {
     return () => {
       if (mineTimeoutRef.current) clearTimeout(mineTimeoutRef.current);
@@ -303,7 +307,6 @@ export function GameProvider({ children }) {
     };
   }, []);
 
-  // Carga unica del estado guardado al montar el componente
   useEffect(() => {
     if (savedPlayer === undefined) return;
     if (hasLoaded.current) return;
@@ -314,7 +317,6 @@ export function GameProvider({ children }) {
     }
   }, [savedPlayer]);
 
-  // Sincronizacion reactiva con Convex despues de cambios significativos
   useEffect(() => {
     if (!hasLoaded.current) return;
     if (state.isMining || state.isTraveling) return;
@@ -346,11 +348,6 @@ export function GameProvider({ children }) {
     saveState,
   ]);
 
-  /**
-   * Inicia la accion de minar en el planeta actual.
-   * Calcula el resultado despues de un cooldown basado en el equipo.
-   * No hace nada si ya se esta minando o viajando.
-   */
   const mine = useCallback(() => {
     if (state.isMining || state.isTraveling) return;
     dispatch({ type: 'MINE_START' });
@@ -390,13 +387,7 @@ export function GameProvider({ children }) {
     }, cooldown);
   }, [state.isMining, state.isTraveling, state.currentPlanet, state.equipment]);
 
-  /**
-   * Inicia el viaje a otro planeta.
-   * El tiempo de viaje depende del equipo (Warp Drive > Jetpack > base).
-   *
-   * @param {string} planetId - ID del planeta destino.
-   */
-  const travel = useCallback((planetId) => {
+  const travel = useCallback((planetId: string) => {
     if (state.isTraveling || state.isMining) return;
     if (state.currentPlanet.id === planetId) return;
     dispatch({ type: 'TRAVEL_START', payload: planetId });
@@ -410,37 +401,19 @@ export function GameProvider({ children }) {
     }, time);
   }, [state.isTraveling, state.isMining, state.currentPlanet, state.equipment]);
 
-  /**
-   * Ejecuta una receta de crafteo.
-   * @param {import('../data/gameData').Recipe} recipe - Receta a ejecutar.
-   */
-  const craft = useCallback((recipe) => {
+  const craft = useCallback((recipe: Recipe) => {
     dispatch({ type: 'CRAFT', payload: recipe });
   }, []);
 
-  /**
-   * Equipa un item del inventario.
-   * @param {string} itemId - ID del item a equipar.
-   */
-  const equip = useCallback((itemId) => {
+  const equip = useCallback((itemId: string) => {
     dispatch({ type: 'EQUIP', payload: itemId });
   }, []);
 
-  /**
-   * Descarta items del inventario.
-   * @param {string} itemId - ID del item a descartar.
-   * @param {number} [amount=1] - Cantidad a descartar.
-   */
-  const discard = useCallback((itemId, amount = 1) => {
+  const discard = useCallback((itemId: string, amount = 1) => {
     dispatch({ type: 'DISCARD', payload: { itemId, amount } });
   }, []);
 
-  /**
-   * Verifica si el jugador tiene los materiales necesarios para una receta.
-   * @param {import('../data/gameData').Recipe} recipe - Receta a verificar.
-   * @returns {boolean} `true` si se puede craftear.
-   */
-  const canCraft = useCallback((recipe) => {
+  const canCraft = useCallback((recipe: Recipe): boolean => {
     for (const [itemId, amount] of Object.entries(recipe.inputs)) {
       if (getItemCount(state.inventory, itemId) < amount) return false;
     }
@@ -459,13 +432,11 @@ export function GameProvider({ children }) {
 
 /**
  * Hook para acceder al contexto del juego.
- *
  * Debe usarse dentro de un componente envuelto por {@link GameProvider}.
  *
- * @returns {GameState & {mine: Function, travel: Function, craft: Function, equip: Function, discard: Function, canCraft: Function}}
  * @throws {Error} Si se usa fuera de GameProvider.
  */
-export function useGame() {
+export function useGame(): GameContextValue {
   const ctx = useContext(GameContext);
   if (!ctx) throw new Error('useGame must be used within GameProvider');
   return ctx;

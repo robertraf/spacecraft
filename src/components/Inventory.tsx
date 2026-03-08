@@ -8,47 +8,29 @@
  * @module Inventory
  */
 
-import { ITEMS, INVENTORY_SIZE } from '../data/gameData';
+import { ITEMS, INVENTORY_SIZE, type Rarity } from '../data/gameData';
 import { useGame } from '../context/GameContext';
 import { useHaptics } from '../hooks/useHaptics';
 
-/** Orden de prioridad para ordenar ítems por rareza (menor = primero). */
-const RARITY_SORT_ORDER = { legendary: 0, rare: 1, uncommon: 2, common: 3 };
+const RARITY_SORT_ORDER: Record<Rarity, number> = { legendary: 0, rare: 1, uncommon: 2, common: 3 };
 
-/**
- * Panel de inventario con barra de capacidad, sección de equipo y grilla de ítems.
- *
- * Muestra la capacidad usada vs disponible, lista de ítems equipados con sus
- * efectos, y una grilla de todos los ítems en inventario con acciones de
- * equipar y descartar.
- *
- * @returns {import('react').JSX.Element}
- */
 export default function Inventory() {
   const { inventory, equipment, equip, discard } = useGame();
   const haptics = useHaptics();
 
   const totalItems = Object.values(inventory).reduce((sum, n) => sum + n, 0);
   const entries = Object.entries(inventory).sort((a, b) => {
-    const ra = ITEMS[a[0]]?.rarity || 'common';
-    const rb = ITEMS[b[0]]?.rarity || 'common';
+    const ra: Rarity = (ITEMS[a[0]]?.rarity as Rarity) ?? 'common';
+    const rb: Rarity = (ITEMS[b[0]]?.rarity as Rarity) ?? 'common';
     return RARITY_SORT_ORDER[ra] - RARITY_SORT_ORDER[rb];
   });
 
-  /**
-   * Equipa un ítem con feedback háptico.
-   * @param {string} itemId - ID del ítem a equipar.
-   */
-  const handleEquip = (itemId) => {
+  const handleEquip = (itemId: string) => {
     haptics.equip();
     equip(itemId);
   };
 
-  /**
-   * Descarta un ítem con feedback háptico.
-   * @param {string} itemId - ID del ítem a descartar.
-   */
-  const handleDiscard = (itemId) => {
+  const handleDiscard = (itemId: string) => {
     haptics.tap();
     discard(itemId, 1);
   };

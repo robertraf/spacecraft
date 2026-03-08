@@ -12,19 +12,21 @@ import { createRoot } from 'react-dom/client'
 import { ConvexReactClient } from 'convex/react'
 import { ConvexAuthProvider } from '@convex-dev/auth/react'
 import './index.css'
-import App from './App.jsx'
+import App from './App'
 
-const convexUrl = import.meta.env.VITE_CONVEX_URL
+const convexUrl = import.meta.env.VITE_CONVEX_URL as string | undefined
 if (!convexUrl) {
   throw new Error(
     'VITE_CONVEX_URL is not set. Define it in .env.local before starting the app.',
   )
 }
 
-/** Cliente de Convex configurado con la URL del deployment. */
 const convex = new ConvexReactClient(convexUrl)
 
-createRoot(document.getElementById('root')).render(
+const rootElement = document.getElementById('root')
+if (!rootElement) throw new Error('Root element not found')
+
+createRoot(rootElement).render(
   <StrictMode>
     <ConvexAuthProvider client={convex}>
       <App />

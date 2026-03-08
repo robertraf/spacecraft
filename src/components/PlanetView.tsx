@@ -14,30 +14,30 @@ import { useGame } from '../context/GameContext';
 import { useHaptics } from '../hooks/useHaptics';
 import { useSound } from '../hooks/useSound';
 
-/**
- * Vista principal del planeta donde el jugador mina recursos.
- *
- * Muestra el emoji del planeta, nivel de peligro, recursos disponibles y
- * un botón de minería que cambia según el equipo (pico normal, eléctrico o taladro).
- * Detecta resultados de minería a través del log del juego para disparar
- * animaciones y feedback audiovisual.
- *
- * @returns {import('react').JSX.Element}
- */
+interface Particle {
+  id: number;
+  dx: number;
+  dy: number;
+}
+
+interface MineResult {
+  text: string;
+  type: 'success' | 'fail';
+}
+
 export default function PlanetView() {
   const { currentPlanet, isMining, isTraveling, mine, equipment, log } = useGame();
   const haptics = useHaptics();
   const sound = useSound();
 
   const [strikeAnim, setStrikeAnim] = useState(false);
-  const [particles, setParticles] = useState([]);
-  const [mineResult, setMineResult] = useState(null);
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const [mineResult, setMineResult] = useState<MineResult | null>(null);
   const prevLogRef = useRef(log);
 
   const hasElectricPickaxe = equipment.includes('electric-pickaxe');
   const hasDrill = equipment.includes('quantum-drill');
 
-  // Detecta resultados de minería observando cambios en el log
   useEffect(() => {
     if (prevLogRef.current !== log && log.length > 0) {
       const latest = log[0];
@@ -56,17 +56,12 @@ export default function PlanetView() {
     prevLogRef.current = log;
   }, [log, sound, haptics]);
 
-  // Detiene el feedback háptico de taladro cuando termina la minería
   useEffect(() => {
     if (!isMining) {
       haptics.stopDrill();
     }
   }, [isMining, haptics]);
 
-  /**
-   * Genera partículas de roca animadas en la posición del planeta.
-   * Las partículas se eliminan automáticamente después de 500ms.
-   */
   const spawnParticles = useCallback(() => {
     const newParticles = Array.from({ length: 6 }, (_, i) => ({
       id: Date.now() + i,
@@ -77,11 +72,6 @@ export default function PlanetView() {
     setTimeout(() => setParticles([]), 500);
   }, []);
 
-  /**
-   * Maneja el click del botón de minería.
-   * Dispara feedback háptico y sonoro según el tipo de herramienta equipada
-   * y lanza la animación de golpe con partículas.
-   */
   const handleMine = () => {
     if (hasElectricPickaxe || hasDrill) {
       haptics.drill();
@@ -114,7 +104,7 @@ export default function PlanetView() {
 
   return (
     <div className="planet-view">
-      <div className="planet-display" style={{ '--planet-color': currentPlanet.color }}>
+      <div className="planet-display" style={{ '--planet-color': currentPlanet.color } as React.CSSProperties}>
         <div
           className={`planet-sphere ${
             strikeAnim && !isElectricMining ? 'mine-strike' : ''
@@ -133,7 +123,7 @@ export default function PlanetView() {
                   style={{
                     '--dx': `${p.dx}px`,
                     '--dy': `${p.dy}px`,
-                  }}
+                  } as React.CSSProperties}
                 />
               ))}
             </div>

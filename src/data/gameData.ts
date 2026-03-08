@@ -50,22 +50,20 @@ export const COMMON_WEIGHT = 50;
 // Planetas
 // ---------------------------------------------------------------------------
 
-/**
- * @typedef {Object} Planet
- * @property {string} id - Identificador único del planeta.
- * @property {string} name - Nombre visible del planeta.
- * @property {string} emoji - Emoji representativo.
- * @property {string} description - Descripción del planeta.
- * @property {string} color - Color CSS del planeta.
- * @property {string[]} resources - IDs de recursos minables en el planeta.
- * @property {number} dangerLevel - Nivel de peligro (1-5).
- */
+export interface Planet {
+  id: string;
+  name: string;
+  emoji: string;
+  description: string;
+  color: string;
+  resources: string[];
+  dangerLevel: number;
+}
 
 /**
  * Lista de planetas explorables en el juego.
- * @type {Planet[]}
  */
-export const PLANETS = [
+export const PLANETS: Planet[] = [
   {
     id: 'terra-nova',
     name: 'Terra Nova',
@@ -117,28 +115,22 @@ export const PLANETS = [
 // Items
 // ---------------------------------------------------------------------------
 
-/**
- * @typedef {'common'|'uncommon'|'rare'|'legendary'} Rarity
- */
+export type Rarity = 'common' | 'uncommon' | 'rare' | 'legendary';
 
-/**
- * @typedef {'resource'|'material'|'tool'|'equipment'} ItemType
- */
+export type ItemType = 'resource' | 'material' | 'tool' | 'equipment';
 
-/**
- * @typedef {Object} Item
- * @property {string} name - Nombre visible del ítem.
- * @property {string} emoji - Emoji representativo.
- * @property {ItemType} type - Categoría del ítem.
- * @property {Rarity} rarity - Rareza del ítem.
- * @property {string} [effect] - Descripción del efecto (solo herramientas/equipo).
- */
+export interface Item {
+  name: string;
+  emoji: string;
+  type: ItemType;
+  rarity: Rarity;
+  effect?: string;
+}
 
 /**
  * Diccionario de todos los ítems del juego indexados por su ID.
- * @type {Record<string, Item>}
  */
-export const ITEMS = {
+export const ITEMS: Record<string, Item> = {
   // Recursos crudos
   'iron-ore': { name: 'Mineral de Hierro', emoji: '🪨', type: 'resource', rarity: 'common' },
   'stone': { name: 'Piedra', emoji: '🧱', type: 'resource', rarity: 'common' },
@@ -179,19 +171,17 @@ export const ITEMS = {
 // Recetas de crafteo
 // ---------------------------------------------------------------------------
 
-/**
- * @typedef {Object} Recipe
- * @property {string} id - Identificador único de la receta.
- * @property {Record<string, number>} inputs - Mapa de itemId -> cantidad requerida.
- * @property {string} output - ID del ítem producido.
- * @property {number} amount - Cantidad producida por crafteo.
- */
+export interface Recipe {
+  id: string;
+  inputs: Record<string, number>;
+  output: string;
+  amount: number;
+}
 
 /**
  * Lista de recetas de crafteo disponibles ordenadas por progresión.
- * @type {Recipe[]}
  */
-export const RECIPES = [
+export const RECIPES: Recipe[] = [
   // Procesado básico
   { id: 'smelt-iron', inputs: { 'iron-ore': 2, 'coal': 1 }, output: 'iron-bar', amount: 1 },
   { id: 'wire-copper', inputs: { 'copper-ore': 2 }, output: 'copper-wire', amount: 2 },
@@ -224,9 +214,8 @@ export const RECIPES = [
 
 /**
  * Mapa de colores CSS por nivel de rareza para uso en la interfaz.
- * @type {Record<Rarity, string>}
  */
-export const RARITY_COLORS = {
+export const RARITY_COLORS: Record<Rarity, string> = {
   common: '#aab8c2',
   uncommon: '#2ecc71',
   rare: '#3498db',

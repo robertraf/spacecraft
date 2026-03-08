@@ -10,38 +10,37 @@
 
 import { useCallback } from 'react';
 
+// Extend Window to include webkitAudioContext for Safari compatibility
+declare global {
+  interface Window {
+    webkitAudioContext?: typeof AudioContext;
+  }
+}
+
+let audioContextInstance: AudioContext | null = null;
+
 /**
  * Obtiene o crea la instancia singleton del AudioContext.
  * Reanuda el contexto si está suspendido (requerimiento de autoplay del navegador).
- *
- * Se usa una propiedad estática en la función en lugar de una variable de módulo
- * para evitar problemas con SSR y testing donde el módulo se evalúa sin `window`.
- *
- * @returns {AudioContext} Instancia activa del AudioContext.
  */
-function getAudioContext() {
-  if (!getAudioContext._instance) {
-    getAudioContext._instance = new (window.AudioContext || window.webkitAudioContext)();
+function getAudioContext(): AudioContext {
+  if (!audioContextInstance) {
+    const AudioContextClass = window.AudioContext ?? window.webkitAudioContext!;
+    audioContextInstance = new AudioContextClass();
   }
-  if (getAudioContext._instance.state === 'suspended') {
-    getAudioContext._instance.resume();
+  if (audioContextInstance.state === 'suspended') {
+    audioContextInstance.resume().catch(() => undefined);
   }
-  return getAudioContext._instance;
+  return audioContextInstance;
 }
 
-/** @type {AudioContext|null} */
-getAudioContext._instance = null;
-
-/**
- * Reproduce un tono sintético con envolvente de volumen exponencial.
- *
- * @param {number} frequency - Frecuencia base en Hz.
- * @param {number} duration - Duración en segundos.
- * @param {OscillatorType} [type='square'] - Tipo de onda del oscilador.
- * @param {number} [volume=0.15] - Volumen inicial (0-1).
- * @param {number} [detune=0] - Desafinación en cents.
- */
-function playTone(frequency, duration, type = 'square', volume = 0.15, detune = 0) {
+function playTone(
+  frequency: number,
+  duration: number,
+  type: OscillatorType = 'square',
+  volume = 0.15,
+  detune = 0,
+): void {
   const ctx = getAudioContext();
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
@@ -60,13 +59,7 @@ function playTone(frequency, duration, type = 'square', volume = 0.15, detune = 
   osc.stop(ctx.currentTime + duration);
 }
 
-/**
- * Reproduce ruido blanco filtrado con paso alto para simular texturas rocosas.
- *
- * @param {number} duration - Duración en segundos.
- * @param {number} [volume=0.08] - Volumen inicial (0-1).
- */
-function playNoise(duration, volume = 0.08) {
+function playNoise(duration: number, volume = 0.08): void {
   const ctx = getAudioContext();
   const bufferSize = ctx.sampleRate * duration;
   const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
@@ -96,41 +89,25 @@ function playNoise(duration, volume = 0.08) {
 
 /**
  * Hook que provee funciones de audio procedural para eventos del juego.
- *
- * Usa la Web Audio API para generar sonidos en tiempo real. Incluye throttling
- * para evitar superposición de sonidos cuando se ejecutan acciones rápidas.
- *
- * @returns {{mineHit: Function, mineSuccess: Function, mineFail: Function, electricDrill: Function}}
- *
- * @example
- * const sound = useSound();
- * sound.mineHit();      // Golpe de pico
- * sound.mineSuccess();  // Tonos ascendentes
- * sound.mineFail();     // Tonos descendentes
- * sound.electricDrill(); // Zumbido de taladro
  */
 export function useSound() {
-  /** Sonido de golpe de minería: ping metálico corto + crunch de roca. */
   const mineHit = useCallback(() => {
     playTone(220, 0.08, 'square', 0.1);
     playTone(440, 0.05, 'sawtooth', 0.06, 50);
     playNoise(0.06, 0.1);
   }, []);
 
-  /** Sonido de minería exitosa: tonos ascendentes tipo sparkle. */
   const mineSuccess = useCallback(() => {
     playTone(523, 0.1, 'sine', 0.12);
     setTimeout(() => playTone(659, 0.1, 'sine', 0.12), 80);
     setTimeout(() => playTone(784, 0.15, 'sine', 0.1), 160);
   }, []);
 
-  /** Sonido de minería fallida: tonos descendentes opacos. */
   const mineFail = useCallback(() => {
     playTone(300, 0.15, 'sawtooth', 0.08);
     setTimeout(() => playTone(200, 0.2, 'sawtooth', 0.06), 100);
   }, []);
 
-  /** Sonido de taladro eléctrico: zumbido continuo con modulación FM y ruido. */
   const electricDrill = useCallback(() => {
     const ctx = getAudioContext();
     const duration = 0.7;
