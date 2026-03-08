@@ -19,6 +19,7 @@ import CraftingTable from './components/CraftingTable';
 import SpaceInvaders from './components/SpaceInvaders';
 import GameLog from './components/GameLog';
 import AuthUpgrade from './components/AuthUpgrade';
+import { useHaptics } from './hooks/useHaptics';
 import './App.css';
 
 interface Tab {
@@ -40,6 +41,7 @@ function GameUI() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('planet');
   const ActiveComponent = TABS.find(t => t.id === activeTab)!.component;
+  const haptics = useHaptics();
 
   return (
     <div className="game-container">
@@ -64,7 +66,7 @@ function GameUI() {
           <button
             key={tab.id}
             className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => { if (tab.id !== activeTab) { haptics.tap(); setActiveTab(tab.id); } }}
           >
             {tab.emoji} {t(tab.labelKey)}
           </button>
