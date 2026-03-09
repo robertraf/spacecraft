@@ -24,6 +24,7 @@ import {
   RARE_WEIGHT_WITH_SCANNER,
   UNCOMMON_WEIGHT,
   COMMON_WEIGHT,
+  isAvatarArtifact,
   type Planet,
   type Recipe,
 } from '../data/gameData';
@@ -59,6 +60,7 @@ interface GameActions {
   travel: (planetId: string) => void;
   craft: (recipe: Recipe) => void;
   equip: (itemId: string) => void;
+  unequip: (itemId: string) => void;
   discard: (itemId: string, amount?: number) => void;
   canCraft: (recipe: Recipe) => boolean;
   addBattleRewards: (rewards: BattleReward[]) => void;
@@ -135,6 +137,7 @@ type GameAction =
   | { type: 'TRAVEL_COMPLETE'; payload: string }
   | { type: 'CRAFT'; payload: Recipe }
   | { type: 'EQUIP'; payload: string }
+  | { type: 'UNEQUIP'; payload: string }
   | { type: 'DISCARD'; payload: { itemId: string; amount: number } }
   | { type: 'ADD_LOG'; payload: { key: string; type: string; params?: Record<string, string | number> } }
   | { type: 'BATTLE_REWARDS'; payload: BattleReward[] };
@@ -245,13 +248,55 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'EQUIP': {
       const itemId = action.payload;
-      const inv = removeFromInventory(state.inventory, itemId, 1);
+      if (state.equipment.includes(itemId)) return state;
+
+      let inv = removeFromInventory(state.inventory, itemId, 1);
       if (!inv) return state;
+
+      let nextEquipment = [...state.equipment];
+      if (isAvatarArtifact(itemId)) {
+        const slot = ITEMS[itemId]?.avatarSlot;
+        if (slot) {
+          const currentlyEquipped = nextEquipment.find((equippedId) => ITEMS[equippedId]?.avatarSlot === slot);
+          if (currentlyEquipped) {
+            nextEquipment = nextEquipment.filter((equippedId) => equippedId !== currentlyEquipped);
+            const restoredInv = addToInventory(inv, currentlyEquipped, 1);
+            if (!restoredInv) {
+              return {
+                ...state,
+                log: appendLog(state.log, 'log.inventoryFullShort', 'warning'),
+              };
+            }
+            inv = restoredInv;
+          }
+        }
+      }
+
       return {
         ...state,
         inventory: inv,
-        equipment: [...state.equipment, itemId],
+        equipment: [...nextEquipment, itemId],
         log: appendLog(state.log, 'log.equipped', 'info', { emoji: ITEMS[itemId].emoji, itemId }),
+      };
+    }
+
+    case 'UNEQUIP': {
+      const itemId = action.payload;
+      if (!state.equipment.includes(itemId)) return state;
+
+      const inv = addToInventory(state.inventory, itemId, 1);
+      if (!inv) {
+        return {
+          ...state,
+          log: appendLog(state.log, 'log.inventoryFullShort', 'warning'),
+        };
+      }
+
+      return {
+        ...state,
+        inventory: inv,
+        equipment: state.equipment.filter((id) => id !== itemId),
+        log: appendLog(state.log, 'log.unequipped', 'info', { emoji: ITEMS[itemId].emoji, itemId }),
       };
     }
 
@@ -434,6 +479,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'EQUIP', payload: itemId });
   }, []);
 
+  const unequip = useCallback((itemId: string) => {
+    dispatch({ type: 'UNEQUIP', payload: itemId });
+  }, []);
+
   const discard = useCallback((itemId: string, amount = 1) => {
     dispatch({ type: 'DISCARD', payload: { itemId, amount } });
   }, []);
@@ -452,7 +501,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   return (
     <GameContext.Provider value={{
       ...state,
-      mine, travel, craft, equip, discard, canCraft, addBattleRewards,
+      mine, travel, craft, equip, unequip, discard, canCraft, addBattleRewards,
     }}>
       {children}
     </GameContext.Provider>
