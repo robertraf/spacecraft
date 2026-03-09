@@ -8,9 +8,10 @@
  * @module GameContext
  */
 
-import { createContext, useContext, useReducer, useCallback, useEffect, useRef } from 'react';
+import { useReducer, useCallback, useEffect, useRef } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
+import { GameContext } from './gameContextShared';
 import {
   PLANETS,
   ITEMS,
@@ -66,9 +67,7 @@ interface GameActions {
   addBattleRewards: (rewards: BattleReward[]) => void;
 }
 
-type GameContextValue = GameState & GameActions;
-
-const GameContext = createContext<GameContextValue | null>(null);
+export type GameContextValue = GameState & GameActions;
 
 const initialState: GameState = {
   currentPlanet: PLANETS[0],
@@ -508,14 +507,3 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-/**
- * Hook to access the game context.
- * Must be used within a component wrapped by {@link GameProvider}.
- *
- * @throws {Error} If used outside of GameProvider.
- */
-export function useGame(): GameContextValue {
-  const ctx = useContext(GameContext);
-  if (!ctx) throw new Error('useGame must be used within GameProvider');
-  return ctx;
-}

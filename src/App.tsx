@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { useConvexAuth } from 'convex/react';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { GameProvider } from './context/GameContext';
-import { useGame } from './context/GameContext';
+import { useGame } from './context/useGame';
 import PlanetView from './components/PlanetView';
 import StarMap from './components/StarMap';
 import Inventory from './components/Inventory';

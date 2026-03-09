@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { useConvexAuth, useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
-import { useGame } from '../context/GameContext';
+import { useGame } from '../context/useGame';
 import { ITEMS, isAvatarArtifact } from '../data/gameData';
 import AvatarProfile from './AvatarProfile';
 

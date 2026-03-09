@@ -11,7 +11,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ITEMS } from '../data/gameData';
-import { useGame } from '../context/GameContext';
+import { useGame } from '../context/useGame';
 import { useHaptics } from '../hooks/useHaptics';
 import { useSound } from '../hooks/useSound';
 

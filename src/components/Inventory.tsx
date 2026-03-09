@@ -10,7 +10,7 @@
 
 import { useTranslation } from 'react-i18next';
 import { ITEMS, INVENTORY_SIZE, isAvatarArtifact, isEquippableItem, type Rarity } from '../data/gameData';
-import { useGame } from '../context/GameContext';
+import { useGame } from '../context/useGame';
 import { useHaptics } from '../hooks/useHaptics';
 
 const RARITY_SORT_ORDER: Record<Rarity, number> = { legendary: 0, rare: 1, uncommon: 2, common: 3 };

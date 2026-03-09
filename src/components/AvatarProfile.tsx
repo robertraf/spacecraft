@@ -9,7 +9,7 @@
 
 import { useTranslation } from 'react-i18next';
 import { AVATAR_SLOTS, ITEMS, isAvatarArtifact, type AvatarSlot } from '../data/gameData';
-import { useGame } from '../context/GameContext';
+import { useGame } from '../context/useGame';
 
 function getArtifactBySlot(equipment: string[], slot: AvatarSlot): string | null {
   const found = equipment.find((itemId) => ITEMS[itemId]?.avatarSlot === slot);

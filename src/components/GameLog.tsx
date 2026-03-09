@@ -8,7 +8,7 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import { useGame } from '../context/GameContext';
+import { useGame } from '../context/useGame';
 import type { LogEntry } from '../context/GameContext';
 
 function LogMessage({ entry }: { entry: LogEntry }) {

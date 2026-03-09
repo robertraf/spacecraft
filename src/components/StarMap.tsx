@@ -10,7 +10,7 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PLANETS, ITEMS } from '../data/gameData';
-import { useGame } from '../context/GameContext';
+import { useGame } from '../context/useGame';
 import { useHaptics } from '../hooks/useHaptics';
 
 export default function StarMap() {

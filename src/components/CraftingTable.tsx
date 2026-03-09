@@ -9,7 +9,7 @@
 
 import { useTranslation } from 'react-i18next';
 import { ITEMS, RECIPES, isEquippableItem, type ItemType, type Recipe } from '../data/gameData';
-import { useGame } from '../context/GameContext';
+import { useGame } from '../context/useGame';
 import { useHaptics } from '../hooks/useHaptics';
 
 const CRAFTING_CATEGORY_ORDER: ItemType[] = ['material', 'tool', 'equipment', 'artifact'];
