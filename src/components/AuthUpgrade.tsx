@@ -50,6 +50,7 @@ export default function AuthUpgrade() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<'google' | null>(null);
   const [error, setError] = useState('');
   const [showProfile, setShowProfile] = useState(false);
 
@@ -85,7 +86,24 @@ export default function AuthUpgrade() {
     setEmail('');
     setPassword('');
     setConfirmPassword('');
+    setOauthLoading(null);
     setError('');
+  }
+
+  async function handleOAuthSignIn(provider: 'google') {
+    setOauthLoading(provider);
+    setError('');
+    try {
+      const { redirect } = await signIn(provider);
+      if (redirect) {
+        window.location.href = redirect.toString();
+        return;
+      }
+      window.location.reload();
+    } catch {
+      setError(t('auth.oauthError'));
+      setOauthLoading(null);
+    }
   }
 
   return (
@@ -167,6 +185,19 @@ export default function AuthUpgrade() {
                 </button>
 
                 <form onSubmit={handleSubmit} className="auth-form">
+                  <div className="auth-social-grid">
+                    <button
+                      type="button"
+                      onClick={() => void handleOAuthSignIn('google')}
+                      disabled={loading || oauthLoading !== null}
+                      className="auth-btn oauth google"
+                    >
+                      {oauthLoading === 'google' ? t('auth.signingIn') : t('auth.signInWithGoogle')}
+                    </button>
+                  </div>
+
+                  <div className="auth-divider">{t('auth.orContinueWithEmail')}</div>
+
                   <input
                     type="email"
                     placeholder={t('auth.emailPlaceholder')}
@@ -194,7 +225,7 @@ export default function AuthUpgrade() {
                       className="auth-input"
                     />
                   )}
-                  <button type="submit" disabled={loading} className="auth-btn primary">
+                  <button type="submit" disabled={loading || oauthLoading !== null} className="auth-btn primary">
                     {loading
                       ? (flow === 'signUp' ? t('auth.creatingAccount') : t('auth.signingIn'))
                       : (flow === 'signUp' ? t('auth.createAccount') : t('auth.signIn'))}

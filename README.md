@@ -21,7 +21,7 @@ SpaceCraft follows a simple but deep loop:
 - **Star map** with fog-of-war — planets are revealed as you discover them
 - **Game log** tracking every action in real time
 - **Persistent game state** — progress syncs automatically with the Convex backend
-- **Account system** — anonymous play by default, optional email/password account to save progress across devices
+- **Account system** — anonymous play by default, with optional email/password or Google sign-in to save progress across devices
 
 ## Planets
 
@@ -65,7 +65,7 @@ Raw Resources → Basic Materials → Intermediate Materials → Tools & Equipme
 | **React 19** | UI framework with hooks-based state management |
 | **Vite** | Dev server and production bundler |
 | **Convex** | Serverless backend (database + real-time sync) |
-| **Convex Auth** | Authentication (Anonymous + Password providers) |
+| **Convex Auth** | Authentication (Anonymous + Password + Google providers) |
 | **Web Haptics API** | Vibration feedback on mobile devices |
 | **Web Audio API** | Procedural mining and crafting sounds |
 | **CSS animations** | Particle effects, electric sparks, planet strike animations |
@@ -95,7 +95,7 @@ Raw Resources → Basic Materials → Intermediate Materials → Tools & Equipme
 │  Queries:   getMe, getMyPlayer                          │
 │  Mutations: saveGameState                               │
 │  Database:  players table + auth tables                 │
-│  Auth:      Anonymous + Password providers              │
+│  Auth:      Anonymous + Password + Google               │
 ├─────────────────────────────────────────────────────────┤
 │  Deployment: Cloudflare Pages (GitHub Actions CI/CD)    │
 └─────────────────────────────────────────────────────────┘
@@ -173,6 +173,17 @@ Then open [http://localhost:5173](http://localhost:5173) in your browser.
 |----------|-------------|----------|
 | `VITE_CONVEX_URL` | Convex deployment URL | Yes |
 | `CONVEX_SITE_URL` | Convex site URL (for auth) | Yes (backend) |
+| `AUTH_GOOGLE_ID` | Google OAuth client ID | Yes (if Google enabled) |
+| `AUTH_GOOGLE_SECRET` | Google OAuth client secret | Yes (if Google enabled) |
+
+`AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` are backend secrets and must be set on your Convex deployment (not in frontend `.env` files).
+
+Set them with:
+
+```bash
+npx convex env set AUTH_GOOGLE_ID "<your-google-client-id>"
+npx convex env set AUTH_GOOGLE_SECRET "<your-google-client-secret>"
+```
 
 ## Deployment
 
