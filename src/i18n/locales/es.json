@@ -50,7 +50,15 @@
   "crafting": {
     "title": "Mesa de Crafteo",
     "craft": "Craftear",
-    "missingMaterials": "Faltan materiales"
+    "missingMaterials": "Faltan materiales",
+    "alreadyOwned": "Ya lo tienes",
+    "ownedBadge": "Obtenido",
+    "categories": {
+      "material": "Materiales",
+      "tool": "Herramientas",
+      "equipment": "Equipamiento",
+      "artifact": "Artefactos"
+    }
   },
   "auth": {
     "saveProgress": "Guardar progreso",

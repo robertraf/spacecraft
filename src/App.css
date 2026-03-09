@@ -561,6 +561,50 @@
   margin-bottom: 12px;
 }
 
+.crafting-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.crafting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.crafting-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.crafting-group-header h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.82rem;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.crafting-group-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 999px;
+  min-width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 7px;
+}
+
 .recipes-list {
   display: flex;
   flex-direction: column;
@@ -582,6 +626,11 @@
 
 .recipe-card.locked {
   opacity: 0.7;
+}
+
+.recipe-card.owned {
+  border-color: rgba(59,130,246,0.45);
+  background: rgba(59,130,246,0.09);
 }
 
 .recipe-output {
@@ -610,6 +659,22 @@
 .output-name {
   font-size: 0.9rem;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.owned-badge {
+  font-size: 0.62rem;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 4px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(59,130,246,0.45);
+  background: rgba(59,130,246,0.16);
+  color: #93c5fd;
 }
 
 .output-effect {
@@ -654,6 +719,11 @@
   background: var(--bg-secondary);
   color: var(--text-muted);
   cursor: not-allowed;
+}
+
+.craft-button.owned:disabled {
+  background: rgba(59,130,246,0.2);
+  color: #bfdbfe;
 }
 
 .craft-button:hover:not(:disabled) {
