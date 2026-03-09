@@ -155,6 +155,12 @@ npx convex dev
 # Start development server
 npm run dev
 
+# Run tests once
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
 # Build for production
 npm run build
 ```
