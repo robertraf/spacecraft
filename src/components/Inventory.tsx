@@ -9,14 +9,14 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import { ITEMS, INVENTORY_SIZE, type Rarity } from '../data/gameData';
+import { ITEMS, INVENTORY_SIZE, isAvatarArtifact, isEquippableItem, type Rarity } from '../data/gameData';
 import { useGame } from '../context/GameContext';
 import { useHaptics } from '../hooks/useHaptics';
 
 const RARITY_SORT_ORDER: Record<Rarity, number> = { legendary: 0, rare: 1, uncommon: 2, common: 3 };
 
 export default function Inventory() {
-  const { inventory, equipment, equip, discard } = useGame();
+  const { inventory, equipment, equip, unequip, discard } = useGame();
   const { t } = useTranslation();
   const haptics = useHaptics();
 
@@ -37,6 +37,11 @@ export default function Inventory() {
     discard(itemId, 1);
   };
 
+  const handleUnequip = (itemId: string) => {
+    haptics.tap();
+    unequip(itemId);
+  };
+
   return (
     <div className="inventory">
       <h3>🎒 {t('inventory.title', { count: totalItems, max: INVENTORY_SIZE })}</h3>
@@ -49,10 +54,16 @@ export default function Inventory() {
           <h4>{t('inventory.equipped')}</h4>
           <div className="equipment-list">
             {equipment.map(id => (
-              <span key={id} className="equipped-item">
-                {ITEMS[id].emoji} {t(`items.${id}.name`)}
-                {ITEMS[id].hasEffect && <span className="item-effect"> — {t(`items.${id}.effect`)}</span>}
-              </span>
+              <div key={id} className="equipped-item-row">
+                <span className="equipped-item">
+                  {ITEMS[id].emoji} {t(`items.${id}.name`)}
+                  {isAvatarArtifact(id) && ITEMS[id].avatarSlot && (
+                    <span className="item-effect"> [{t(`avatar.slots.${ITEMS[id].avatarSlot}`)}]</span>
+                  )}
+                  {ITEMS[id].hasEffect && <span className="item-effect"> — {t(`items.${id}.effect`)}</span>}
+                </span>
+                <button className="btn-equip" onClick={() => handleUnequip(id)}>{t('inventory.unequip')}</button>
+              </div>
             ))}
           </div>
         </div>
@@ -62,7 +73,7 @@ export default function Inventory() {
         {entries.map(([itemId, count]) => {
           const item = ITEMS[itemId];
           if (!item) return null;
-          const isEquippable = item.type === 'tool' || item.type === 'equipment';
+          const isEquippable = isEquippableItem(itemId);
           const alreadyEquipped = equipment.includes(itemId);
 
           return (
@@ -72,10 +83,16 @@ export default function Inventory() {
                 <span className="item-count">x{count}</span>
               </div>
               <span className="item-name">{t(`items.${itemId}.name`)}</span>
+              {isAvatarArtifact(itemId) && item.avatarSlot && (
+                <span className="item-effect-text">{t('avatar.slot')}: {t(`avatar.slots.${item.avatarSlot}`)}</span>
+              )}
               {item.hasEffect && <span className="item-effect-text">{t(`items.${itemId}.effect`)}</span>}
               <div className="item-actions">
                 {isEquippable && !alreadyEquipped && (
                   <button className="btn-equip" onClick={() => handleEquip(itemId)}>{t('inventory.equip')}</button>
+                )}
+                {isEquippable && alreadyEquipped && (
+                  <button className="btn-equip" onClick={() => handleUnequip(itemId)}>{t('inventory.unequip')}</button>
                 )}
                 <button className="btn-discard" onClick={() => handleDiscard(itemId)}>🗑️</button>
               </div>

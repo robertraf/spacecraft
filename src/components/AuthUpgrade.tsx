@@ -13,6 +13,31 @@ import { useTranslation } from 'react-i18next';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { useConvexAuth, useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
+import { useGame } from '../context/GameContext';
+import { ITEMS, isAvatarArtifact } from '../data/gameData';
+import AvatarProfile from './AvatarProfile';
+
+function HeaderAvatar() {
+  const { equipment } = useGame();
+  const equippedArtifacts = equipment.filter((itemId) => isAvatarArtifact(itemId));
+  const bySlot = (slot: 'head' | 'body' | 'back' | 'aura') =>
+    equippedArtifacts.find((itemId) => ITEMS[itemId]?.avatarSlot === slot) ?? null;
+
+  const aura = bySlot('aura');
+  const back = bySlot('back');
+  const body = bySlot('body');
+  const head = bySlot('head');
+
+  return (
+    <span className="header-avatar-mini" aria-hidden="true">
+      {aura && <span className="header-avatar-layer header-avatar-aura">{ITEMS[aura].emoji}</span>}
+      {back && <span className="header-avatar-layer header-avatar-back">{ITEMS[back].emoji}</span>}
+      <span className="header-avatar-base">🧑‍🚀</span>
+      {body && <span className="header-avatar-layer header-avatar-body">{ITEMS[body].emoji}</span>}
+      {head && <span className="header-avatar-layer header-avatar-head">{ITEMS[head].emoji}</span>}
+    </span>
+  );
+}
 
 export default function AuthUpgrade() {
   const { signIn, signOut } = useAuthActions();
@@ -26,6 +51,7 @@ export default function AuthUpgrade() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showProfile, setShowProfile] = useState(false);
 
   if (!isAuthenticated) return null;
 
@@ -55,6 +81,7 @@ export default function AuthUpgrade() {
 
   function handleClose() {
     setOpen(false);
+    setShowProfile(false);
     setEmail('');
     setPassword('');
     setConfirmPassword('');
@@ -68,20 +95,43 @@ export default function AuthUpgrade() {
         onClick={() => setOpen(true)}
         title={isLinked ? t('auth.accountTooltip', { email: me.email }) : t('auth.linkTooltip')}
       >
-        {isLinked ? '👤' : '💾'}
+        <HeaderAvatar />
+        {!isLinked && <span className="auth-save-badge">💾</span>}
       </button>
 
       {open && (
         <div className="auth-modal-overlay" onClick={handleClose}>
-          <div className="auth-modal" onClick={e => e.stopPropagation()}>
+          <div className={`auth-modal ${showProfile ? 'profile-mode' : ''}`} onClick={e => e.stopPropagation()}>
             <button className="auth-modal-close" onClick={handleClose}>✕</button>
 
-            {isLinked ? (
+            {showProfile ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowProfile(false)}
+                  className="auth-btn secondary"
+                  style={{ marginBottom: 10 }}
+                >
+                  {t('auth.backToAccount')}
+                </button>
+                <AvatarProfile />
+              </>
+            ) : isLinked ? (
               <>
                 <h2>{t('auth.linkedAccount')}</h2>
                 <p className="auth-modal-desc">
                   {t('auth.autoSave', { email: me.email })}
                 </p>
+
+                <button
+                  type="button"
+                  onClick={() => setShowProfile(true)}
+                  className="auth-btn secondary"
+                  style={{ marginBottom: 8 }}
+                >
+                  {t('auth.viewProfile')}
+                </button>
+
                 <button
                   onClick={async () => {
                     try {
@@ -106,6 +156,15 @@ export default function AuthUpgrade() {
                     ? t('auth.signUpDesc')
                     : t('auth.signInDesc')}
                 </p>
+
+                <button
+                  type="button"
+                  onClick={() => setShowProfile(true)}
+                  className="auth-btn secondary"
+                  style={{ marginBottom: 8 }}
+                >
+                  {t('auth.viewProfile')}
+                </button>
 
                 <form onSubmit={handleSubmit} className="auth-form">
                   <input

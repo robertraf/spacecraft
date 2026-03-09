@@ -8,6 +8,7 @@
     "planet": "Planet",
     "map": "Map",
     "battle": "Battle",
+    "profile": "Profile",
     "inventory": "Inventory",
     "craft": "Crafting"
   },
@@ -30,7 +31,21 @@
     "title": "Inventory ({{count}}/{{max}})",
     "equipped": "Equipped:",
     "equip": "Equip",
+    "unequip": "Unequip",
     "empty": "Your inventory is empty. Go mine!"
+  },
+  "avatar": {
+    "title": "Avatar Profile",
+    "slot": "Slot",
+    "emptySlot": "Empty slot",
+    "equippedCount": "Equipped artifacts: {{count}}",
+    "craftedCount": "Crafted artifacts: {{count}}",
+    "slots": {
+      "head": "Head",
+      "body": "Body",
+      "back": "Back",
+      "aura": "Aura"
+    }
   },
   "crafting": {
     "title": "Crafting Table",
@@ -45,6 +60,8 @@
     "linkedAccount": "Linked account",
     "autoSave": "Your progress is automatically saved to <1>{{email}}</1>",
     "signOut": "Sign out",
+    "viewProfile": "View profile",
+    "backToAccount": "Back to account",
     "emailPlaceholder": "you@email.com",
     "passwordPlaceholder": "Password (min. 8 characters)",
     "confirmPasswordPlaceholder": "Confirm password",
@@ -76,6 +93,7 @@
     "crafted": "Crafted {{amount}}x {{emoji}} {{name}}!",
     "arrived": "Arrived at {{emoji}} {{name}}",
     "equipped": "Equipped {{emoji}} {{name}}",
+    "unequipped": "Unequipped {{emoji}} {{name}}",
     "discarded": "Discarded {{amount}}x {{name}}",
     "nothing": "Nothing!",
     "battleRewards": "Battle rewards: {{items}}"
@@ -130,7 +148,11 @@
     "shield-gen": { "name": "Shield Generator", "effect": "Protects on dangerous planets" },
     "electric-pickaxe": { "name": "Electric Pickaxe", "effect": "Mines fast with electric drill effect" },
     "quantum-drill": { "name": "Quantum Drill", "effect": "Triples resources and finds secret items" },
-    "warp-drive": { "name": "Warp Drive", "effect": "Instant travel between planets" }
+    "warp-drive": { "name": "Warp Drive", "effect": "Instant travel between planets" },
+    "solar-crown": { "name": "Solar Crown", "effect": "Artifact: radiant helm for your avatar" },
+    "titan-armor": { "name": "Titan Armor", "effect": "Artifact: reinforced cosmic armor" },
+    "nebula-cape": { "name": "Nebula Cape", "effect": "Artifact: stellar cape woven from nebula fibers" },
+    "ion-aura": { "name": "Ion Aura", "effect": "Artifact: charged aura around your avatar" }
   },
   "planets": {
     "terra-nova": { "name": "Terra Nova", "description": "A rocky planet rich in basic minerals." },

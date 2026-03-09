@@ -105,13 +105,18 @@ export const PLANETS: Planet[] = [
 
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'legendary';
 
-export type ItemType = 'resource' | 'material' | 'tool' | 'equipment';
+export type ItemType = 'resource' | 'material' | 'tool' | 'equipment' | 'artifact';
+
+export type AvatarSlot = 'head' | 'body' | 'back' | 'aura';
+
+export const AVATAR_SLOTS: AvatarSlot[] = ['head', 'body', 'back', 'aura'];
 
 export interface Item {
   emoji: string;
   type: ItemType;
   rarity: Rarity;
   hasEffect?: boolean;
+  avatarSlot?: AvatarSlot;
 }
 
 /**
@@ -153,7 +158,22 @@ export const ITEMS: Record<string, Item> = {
   'electric-pickaxe': { emoji: '⚡', type: 'tool', rarity: 'rare', hasEffect: true },
   'quantum-drill': { emoji: '🌀', type: 'tool', rarity: 'legendary', hasEffect: true },
   'warp-drive': { emoji: '✨', type: 'equipment', rarity: 'legendary', hasEffect: true },
+
+  // Avatar artifacts
+  'solar-crown': { emoji: '👑', type: 'artifact', rarity: 'rare', avatarSlot: 'head', hasEffect: true },
+  'titan-armor': { emoji: '🥋', type: 'artifact', rarity: 'rare', avatarSlot: 'body', hasEffect: true },
+  'nebula-cape': { emoji: '🧥', type: 'artifact', rarity: 'legendary', avatarSlot: 'back', hasEffect: true },
+  'ion-aura': { emoji: '🫧', type: 'artifact', rarity: 'legendary', avatarSlot: 'aura', hasEffect: true },
 };
+
+export function isAvatarArtifact(itemId: string): boolean {
+  return ITEMS[itemId]?.type === 'artifact';
+}
+
+export function isEquippableItem(itemId: string): boolean {
+  const type = ITEMS[itemId]?.type;
+  return type === 'tool' || type === 'equipment' || type === 'artifact';
+}
 
 // ---------------------------------------------------------------------------
 // Crafting recipes
@@ -194,6 +214,12 @@ export const RECIPES: Recipe[] = [
   // Legendary
   { id: 'drill', inputs: { 'titanium-bar': 5, 'diamond': 3, 'nano-tube': 2, 'energy-cell': 2 }, output: 'quantum-drill', amount: 1 },
   { id: 'warp', inputs: { 'nano-tube': 5, 'plasma-cell': 3, 'diamond': 2, 'circuit-board': 3 }, output: 'warp-drive', amount: 1 },
+
+  // Avatar artifacts
+  { id: 'solar-crown', inputs: { 'diamond': 1, 'circuit-board': 1, 'energy-cell': 1 }, output: 'solar-crown', amount: 1 },
+  { id: 'titan-armor', inputs: { 'titanium-bar': 2, 'bio-gel': 1, 'steel-plate': 1 }, output: 'titan-armor', amount: 1 },
+  { id: 'nebula-cape', inputs: { 'nano-tube': 2, 'bio-fiber': 3, 'plasma-cell': 1 }, output: 'nebula-cape', amount: 1 },
+  { id: 'ion-aura', inputs: { 'plasma-cell': 2, 'ice-crystal': 2, 'energy-cell': 2 }, output: 'ion-aura', amount: 1 },
 ];
 
 // ---------------------------------------------------------------------------

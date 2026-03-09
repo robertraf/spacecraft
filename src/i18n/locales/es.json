@@ -8,6 +8,7 @@
     "planet": "Planeta",
     "map": "Mapa",
     "battle": "Batalla",
+    "profile": "Perfil",
     "inventory": "Inventario",
     "craft": "Crafteo"
   },
@@ -30,7 +31,21 @@
     "title": "Inventario ({{count}}/{{max}})",
     "equipped": "Equipado:",
     "equip": "Equipar",
+    "unequip": "Desequipar",
     "empty": "Tu inventario está vacío. ¡Ve a minar!"
+  },
+  "avatar": {
+    "title": "Perfil de Avatar",
+    "slot": "Ranura",
+    "emptySlot": "Ranura vacía",
+    "equippedCount": "Artefactos equipados: {{count}}",
+    "craftedCount": "Artefactos crafteados: {{count}}",
+    "slots": {
+      "head": "Cabeza",
+      "body": "Cuerpo",
+      "back": "Espalda",
+      "aura": "Aura"
+    }
   },
   "crafting": {
     "title": "Mesa de Crafteo",
@@ -45,6 +60,8 @@
     "linkedAccount": "Cuenta vinculada",
     "autoSave": "Tu progreso se guarda automáticamente en <1>{{email}}</1>",
     "signOut": "Cerrar sesión",
+    "viewProfile": "Ver perfil",
+    "backToAccount": "Volver a la cuenta",
     "emailPlaceholder": "tu@email.com",
     "passwordPlaceholder": "Contraseña (mín. 8 caracteres)",
     "confirmPasswordPlaceholder": "Confirmar contraseña",
@@ -76,6 +93,7 @@
     "crafted": "Crafteaste {{amount}}x {{emoji}} {{name}}!",
     "arrived": "Llegaste a {{emoji}} {{name}}",
     "equipped": "Equipaste {{emoji}} {{name}}",
+    "unequipped": "Desequipaste {{emoji}} {{name}}",
     "discarded": "Descartaste {{amount}}x {{name}}",
     "nothing": "¡Nada!",
     "battleRewards": "Recompensas de batalla: {{items}}"
@@ -130,7 +148,11 @@
     "shield-gen": { "name": "Generador de Escudo", "effect": "Protege en planetas peligrosos" },
     "electric-pickaxe": { "name": "Pico Eléctrico", "effect": "Mina rápido con efecto de taladro eléctrico" },
     "quantum-drill": { "name": "Taladro Cuántico", "effect": "Triplica recursos y encuentra items secretos" },
-    "warp-drive": { "name": "Motor Warp", "effect": "Viaje instantáneo entre planetas" }
+    "warp-drive": { "name": "Motor Warp", "effect": "Viaje instantáneo entre planetas" },
+    "solar-crown": { "name": "Corona Solar", "effect": "Artefacto: casco radiante para tu avatar" },
+    "titan-armor": { "name": "Armadura Titán", "effect": "Artefacto: armadura cósmica reforzada" },
+    "nebula-cape": { "name": "Capa Nebular", "effect": "Artefacto: capa estelar tejida con fibras de nebulosa" },
+    "ion-aura": { "name": "Aura Iónica", "effect": "Artefacto: aura cargada alrededor de tu avatar" }
   },
   "planets": {
     "terra-nova": { "name": "Terra Nova", "description": "Un planeta rocoso rico en minerales básicos." },
