@@ -50,7 +50,15 @@
   "crafting": {
     "title": "Crafting Table",
     "craft": "Craft",
-    "missingMaterials": "Missing materials"
+    "missingMaterials": "Missing materials",
+    "alreadyOwned": "Already owned",
+    "ownedBadge": "Owned",
+    "categories": {
+      "material": "Materials",
+      "tool": "Tools",
+      "equipment": "Equipment",
+      "artifact": "Artifacts"
+    }
   },
   "auth": {
     "saveProgress": "Save progress",
