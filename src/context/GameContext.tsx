@@ -356,6 +356,13 @@ function calculateMineAmount({ hasDrill, hasElectricPickaxe, hasPickaxe }: MineF
   return 1;
 }
 
+// Internal utilities intentionally namespaced for unit tests only.
+export const __testUtils = {
+  initialState,
+  gameReducer,
+  calculateMineAmount,
+} as const;
+
 /**
  * Global game context provider.
  */
