@@ -145,7 +145,7 @@ export const ITEMS: Record<string, Item> = {
   // Crafted materials
   'iron-bar': { emoji: '🔩', type: 'material', rarity: 'common' },
   'copper-wire': { emoji: '🔗', type: 'material', rarity: 'common' },
-  'steel-plate': { emoji: '🛡️', type: 'material', rarity: 'uncommon' },
+  'steel-plate': { emoji: '🔳', type: 'material', rarity: 'uncommon' },
   'titanium-bar': { emoji: '⚙️', type: 'material', rarity: 'uncommon' },
   'energy-cell': { emoji: '🔋', type: 'material', rarity: 'uncommon' },
   'bio-gel': { emoji: '🧪', type: 'material', rarity: 'uncommon' },
@@ -155,7 +155,7 @@ export const ITEMS: Record<string, Item> = {
   'scanner': { emoji: '📡', type: 'tool', rarity: 'uncommon', hasEffect: true },
   'jetpack': { emoji: '🚀', type: 'equipment', rarity: 'rare', hasEffect: true },
   'shield-gen': { emoji: '🛡️', type: 'equipment', rarity: 'rare', hasEffect: true },
-  'electric-pickaxe': { emoji: '⚡', type: 'tool', rarity: 'rare', hasEffect: true },
+  'electric-pickaxe': { emoji: '⚒️', type: 'tool', rarity: 'rare', hasEffect: true },
   'quantum-drill': { emoji: '🌀', type: 'tool', rarity: 'legendary', hasEffect: true },
   'warp-drive': { emoji: '✨', type: 'equipment', rarity: 'legendary', hasEffect: true },
 
@@ -163,7 +163,7 @@ export const ITEMS: Record<string, Item> = {
   'solar-crown': { emoji: '👑', type: 'artifact', rarity: 'rare', avatarSlot: 'head', hasEffect: true },
   'titan-armor': { emoji: '🥋', type: 'artifact', rarity: 'rare', avatarSlot: 'body', hasEffect: true },
   'nebula-cape': { emoji: '🧥', type: 'artifact', rarity: 'legendary', avatarSlot: 'back', hasEffect: true },
-  'ion-aura': { emoji: '🫧', type: 'artifact', rarity: 'legendary', avatarSlot: 'aura', hasEffect: true },
+  'ion-aura': { emoji: '💫', type: 'artifact', rarity: 'legendary', avatarSlot: 'aura', hasEffect: true },
 };
 
 export function isAvatarArtifact(itemId: string): boolean {
