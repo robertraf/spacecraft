@@ -22,7 +22,8 @@ describe('battle accessibility locale strings', () => {
     };
 
     for (const key of requiredBattleKeys) {
-      expect(locale.battle?.[key]).toBeTruthy();
+      expect(locale.battle?.[key]).toBeTypeOf('string');
+      expect(locale.battle?.[key]?.trim().length).toBeGreaterThan(0);
     }
   });
 });

@@ -1258,7 +1258,7 @@
 .si-controls-hint {
   margin: 0;
   text-align: center;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
 }
 
@@ -1302,7 +1302,7 @@
   opacity: 0.4;
 }
 
-@media (any-pointer: coarse) {
+@media (pointer: coarse) {
   .si-controls {
     display: flex;
   }
