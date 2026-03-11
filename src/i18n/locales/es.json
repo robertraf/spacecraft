@@ -129,54 +129,146 @@
     "bonusFastShip": "Nave rápida",
     "bonusDamage": "daño",
     "bonusTeleport": "Habilidad de teletransporte",
-    "canvasLabel": "Space Invaders battle area",
-    "controlsKeyboardHint": "Use left and right arrow keys to move. Press space or up arrow to shoot.",
-    "controlsTouchHint": "Swipe left or right to move. Tap or swipe up to shoot.",
-    "moveLeft": "Move left",
-    "shoot": "Shoot",
-    "moveRight": "Move right",
-    "teleport": "Teleport"
+    "canvasLabel": "Área de batalla de Space Invaders",
+    "controlsKeyboardHint": "Usa las flechas izquierda y derecha para moverte. Presiona espacio o flecha arriba para disparar.",
+    "controlsTouchHint": "Desliza a la izquierda o derecha para moverte. Toca o desliza hacia arriba para disparar.",
+    "moveLeft": "Mover a la izquierda",
+    "shoot": "Disparar",
+    "moveRight": "Mover a la derecha",
+    "teleport": "Teletransportar"
   },
   "items": {
-    "iron-ore": { "name": "Mineral de Hierro" },
-    "stone": { "name": "Piedra" },
-    "copper-ore": { "name": "Mineral de Cobre" },
-    "coal": { "name": "Carbón" },
-    "obsidian": { "name": "Obsidiana" },
-    "diamond": { "name": "Diamante" },
-    "sulfur": { "name": "Azufre" },
-    "ice-crystal": { "name": "Cristal de Hielo" },
-    "titanium-ore": { "name": "Mineral de Titanio" },
-    "frozen-gas": { "name": "Gas Congelado" },
-    "bio-fiber": { "name": "Fibra Biológica" },
-    "alien-wood": { "name": "Madera Alien" },
-    "nectar": { "name": "Néctar Espacial" },
-    "circuit-board": { "name": "Placa de Circuito" },
-    "nano-tube": { "name": "Nanotubo" },
-    "plasma-cell": { "name": "Celda de Plasma" },
-    "iron-bar": { "name": "Barra de Hierro" },
-    "copper-wire": { "name": "Cable de Cobre" },
-    "steel-plate": { "name": "Placa de Acero" },
-    "titanium-bar": { "name": "Barra de Titanio" },
-    "energy-cell": { "name": "Celda de Energía" },
-    "bio-gel": { "name": "Bio-Gel" },
-    "space-pickaxe": { "name": "Pico Espacial", "effect": "Duplica recursos al minar" },
-    "scanner": { "name": "Escáner", "effect": "Revela items raros" },
-    "jetpack": { "name": "Jetpack", "effect": "Viaja más rápido entre planetas" },
-    "shield-gen": { "name": "Generador de Escudo", "effect": "Protege en planetas peligrosos" },
-    "electric-pickaxe": { "name": "Pico Eléctrico", "effect": "Mina rápido con efecto de taladro eléctrico" },
-    "quantum-drill": { "name": "Taladro Cuántico", "effect": "Triplica recursos y encuentra items secretos" },
-    "warp-drive": { "name": "Motor Warp", "effect": "Viaje instantáneo entre planetas" },
-    "solar-crown": { "name": "Corona Solar", "effect": "Artefacto: casco radiante para tu avatar" },
-    "titan-armor": { "name": "Armadura Titán", "effect": "Artefacto: armadura cósmica reforzada" },
-    "nebula-cape": { "name": "Capa Nebular", "effect": "Artefacto: capa estelar tejida con fibras de nebulosa" },
-    "ion-aura": { "name": "Aura Iónica", "effect": "Artefacto: aura cargada alrededor de tu avatar" }
+    "iron-ore": {
+      "name": "Mineral de Hierro"
+    },
+    "stone": {
+      "name": "Piedra"
+    },
+    "copper-ore": {
+      "name": "Mineral de Cobre"
+    },
+    "coal": {
+      "name": "Carbón"
+    },
+    "obsidian": {
+      "name": "Obsidiana"
+    },
+    "diamond": {
+      "name": "Diamante"
+    },
+    "sulfur": {
+      "name": "Azufre"
+    },
+    "ice-crystal": {
+      "name": "Cristal de Hielo"
+    },
+    "titanium-ore": {
+      "name": "Mineral de Titanio"
+    },
+    "frozen-gas": {
+      "name": "Gas Congelado"
+    },
+    "bio-fiber": {
+      "name": "Fibra Biológica"
+    },
+    "alien-wood": {
+      "name": "Madera Alien"
+    },
+    "nectar": {
+      "name": "Néctar Espacial"
+    },
+    "circuit-board": {
+      "name": "Placa de Circuito"
+    },
+    "nano-tube": {
+      "name": "Nanotubo"
+    },
+    "plasma-cell": {
+      "name": "Celda de Plasma"
+    },
+    "iron-bar": {
+      "name": "Barra de Hierro"
+    },
+    "copper-wire": {
+      "name": "Cable de Cobre"
+    },
+    "steel-plate": {
+      "name": "Placa de Acero"
+    },
+    "titanium-bar": {
+      "name": "Barra de Titanio"
+    },
+    "energy-cell": {
+      "name": "Celda de Energía"
+    },
+    "bio-gel": {
+      "name": "Bio-Gel"
+    },
+    "space-pickaxe": {
+      "name": "Pico Espacial",
+      "effect": "Duplica recursos al minar"
+    },
+    "scanner": {
+      "name": "Escáner",
+      "effect": "Revela items raros"
+    },
+    "jetpack": {
+      "name": "Jetpack",
+      "effect": "Viaja más rápido entre planetas"
+    },
+    "shield-gen": {
+      "name": "Generador de Escudo",
+      "effect": "Protege en planetas peligrosos"
+    },
+    "electric-pickaxe": {
+      "name": "Pico Eléctrico",
+      "effect": "Mina rápido con efecto de taladro eléctrico"
+    },
+    "quantum-drill": {
+      "name": "Taladro Cuántico",
+      "effect": "Triplica recursos y encuentra items secretos"
+    },
+    "warp-drive": {
+      "name": "Motor Warp",
+      "effect": "Viaje instantáneo entre planetas"
+    },
+    "solar-crown": {
+      "name": "Corona Solar",
+      "effect": "Artefacto: casco radiante para tu avatar"
+    },
+    "titan-armor": {
+      "name": "Armadura Titán",
+      "effect": "Artefacto: armadura cósmica reforzada"
+    },
+    "nebula-cape": {
+      "name": "Capa Nebular",
+      "effect": "Artefacto: capa estelar tejida con fibras de nebulosa"
+    },
+    "ion-aura": {
+      "name": "Aura Iónica",
+      "effect": "Artefacto: aura cargada alrededor de tu avatar"
+    }
   },
   "planets": {
-    "terra-nova": { "name": "Terra Nova", "description": "Un planeta rocoso rico en minerales básicos." },
-    "volcanus": { "name": "Volcanus", "description": "Mundo volcánico con minerales raros en sus cavernas." },
-    "glacius": { "name": "Glacius", "description": "Planeta helado con cristales energéticos bajo el hielo." },
-    "verdantis": { "name": "Verdantis", "description": "Selva alienígena llena de materiales orgánicos." },
-    "nebulon": { "name": "Nebulón", "description": "Estación espacial abandonada con tecnología antigua." }
+    "terra-nova": {
+      "name": "Terra Nova",
+      "description": "Un planeta rocoso rico en minerales básicos."
+    },
+    "volcanus": {
+      "name": "Volcanus",
+      "description": "Mundo volcánico con minerales raros en sus cavernas."
+    },
+    "glacius": {
+      "name": "Glacius",
+      "description": "Planeta helado con cristales energéticos bajo el hielo."
+    },
+    "verdantis": {
+      "name": "Verdantis",
+      "description": "Selva alienígena llena de materiales orgánicos."
+    },
+    "nebulon": {
+      "name": "Nebulón",
+      "description": "Estación espacial abandonada con tecnología antigua."
+    }
   }
 }
