@@ -128,7 +128,14 @@
     "bonusExtraLives": "extra lives",
     "bonusFastShip": "Fast ship",
     "bonusDamage": "damage",
-    "bonusTeleport": "Teleport ability"
+    "bonusTeleport": "Teleport ability",
+    "canvasLabel": "Área de batalla de Space Invaders",
+    "controlsKeyboardHint": "Usa las flechas izquierda y derecha para moverte. Presiona espacio o flecha arriba para disparar.",
+    "controlsTouchHint": "Desliza a la izquierda o derecha para moverte. Toca o desliza hacia arriba para disparar.",
+    "moveLeft": "Mover a la izquierda",
+    "shoot": "Disparar",
+    "moveRight": "Mover a la derecha",
+    "teleport": "Teletransportar"
   },
   "items": {
     "iron-ore": { "name": "Iron Ore" },
