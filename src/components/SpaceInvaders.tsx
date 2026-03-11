@@ -550,15 +550,22 @@ export default function SpaceInvaders() {
             width={CANVAS_W}
             height={CANVAS_H}
             className="si-canvas"
+            role="img"
+            aria-label={t('battle.canvasLabel')}
+            aria-describedby="si-controls-hint"
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
           />
+          <p id="si-controls-hint" className="si-controls-hint">
+            <span className="si-hint-keyboard">{t('battle.controlsKeyboardHint')}</span>
+            <span className="si-hint-touch">{t('battle.controlsTouchHint')}</span>
+          </p>
           <div className="si-controls">
-            <button className="si-ctrl-btn" onClick={() => moveShip(-1)}>⬅️</button>
-            <button className="si-ctrl-btn si-fire-btn" onClick={shoot}>🔥</button>
-            <button className="si-ctrl-btn" onClick={() => moveShip(1)}>➡️</button>
+            <button type="button" className="si-ctrl-btn" aria-label={t('battle.moveLeft')} onClick={() => moveShip(-1)}>⬅️</button>
+            <button type="button" className="si-ctrl-btn si-fire-btn" aria-label={t('battle.shoot')} onClick={shoot}>🔥</button>
+            <button type="button" className="si-ctrl-btn" aria-label={t('battle.moveRight')} onClick={() => moveShip(1)}>➡️</button>
             {bonuses.teleportCooldown > 0 && (
-              <button className="si-ctrl-btn si-teleport-btn" onClick={teleport}>✨</button>
+              <button type="button" className="si-ctrl-btn si-teleport-btn" aria-label={t('battle.teleport')} onClick={teleport}>✨</button>
             )}
           </div>
         </>

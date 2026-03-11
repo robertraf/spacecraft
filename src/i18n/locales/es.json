@@ -128,7 +128,14 @@
     "bonusExtraLives": "vidas extra",
     "bonusFastShip": "Nave rápida",
     "bonusDamage": "daño",
-    "bonusTeleport": "Habilidad de teletransporte"
+    "bonusTeleport": "Habilidad de teletransporte",
+    "canvasLabel": "Área de batalla de Space Invaders",
+    "controlsKeyboardHint": "Usa las flechas izquierda y derecha para moverte. Presiona espacio o flecha arriba para disparar.",
+    "controlsTouchHint": "Desliza a la izquierda o derecha para moverte. Toca o desliza hacia arriba para disparar.",
+    "moveLeft": "Mover a la izquierda",
+    "shoot": "Disparar",
+    "moveRight": "Mover a la derecha",
+    "teleport": "Teletransportar"
   },
   "items": {
     "iron-ore": { "name": "Mineral de Hierro" },

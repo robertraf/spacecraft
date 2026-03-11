@@ -1250,9 +1250,20 @@
 
 /* Controls */
 .si-controls {
-  display: flex;
+  display: none;
   gap: 12px;
   justify-content: center;
+}
+
+.si-controls-hint {
+  margin: 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.si-hint-touch {
+  display: none;
 }
 
 .si-ctrl-btn {
@@ -1289,6 +1300,20 @@
 
 .si-teleport-btn.cooldown {
   opacity: 0.4;
+}
+
+@media (pointer: coarse) {
+  .si-controls {
+    display: flex;
+  }
+
+  .si-hint-keyboard {
+    display: none;
+  }
+
+  .si-hint-touch {
+    display: inline;
+  }
 }
 
 /* Start screen */
